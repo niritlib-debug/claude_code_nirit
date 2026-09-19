@@ -71,3 +71,9 @@ The first version of the project, built in this order: the spec was written, thr
 ### 9 · 17:13 · [`d637fe7`](https://github.com/niritlib-debug/claude_code_nirit/commit/d637fe7) · SPEC: record that the Download CSV file was verified
 - One line in the SPEC acceptance checks changed from "not seen" to "checked": the downloaded file matches the original byte for byte.
 - Files: `SPEC.md`
+
+### 10 · 17:24 · [`f301216`](https://github.com/niritlib-debug/claude_code_nirit/commit/f301216) · Turn Practice.md into a change log with all changes so far
+- `Practice.md` was rewritten. The first version (entry 5) was Hebrew working instructions, which was a mistake: the file is meant to be a **log**. It now lists every change from the start (entries 1–9, with commit links, files and how each was checked) and explains that a new entry is added after every commit and push.
+- The old Hebrew instructions were removed. The rule they described still applies: commit and push every change, then log it here.
+- README file table and the SPEC change log were updated to describe the file as a change log.
+- Files: `Practice.md`, `README.md`, `SPEC.md`
