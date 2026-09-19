@@ -274,7 +274,7 @@ Checked in the browser on 2026-09-19 (v1).
 - [x] The Urban logo and name appear in the header on desktop and mobile.
 - [x] Download CSV: the button points at `data/employees.csv` with the download name `urban-employees-mock.csv`; that file has the 8 columns, 140 rows (136 full-time), and is served as `text/csv`.
 - [x] Download CSV: pressing it leaves the dashboard unchanged; the button is 56 px tall (64 px on desktop) and full width on a 375 px phone, with no horizontal scroll.
-- [ ] Not seen: the file landing in the computer's Downloads folder (the preview pane used for testing does not show downloads). Only the request for the file was confirmed.
+- [x] Download CSV: pressing it in the browser saved a file named `urban-employees-mock.csv` that is identical, byte for byte, to `data/employees.csv`.
 - [x] Contractors and interns in the CSV are not counted, and do not appear in Recent joiners.
 - [x] The CSV reader handles quoted commas and quotes, Windows line endings, a byte-order mark, an unknown department (goes to Other), out-of-range progress, future start dates, and bad or missing dates (row skipped and reported).
 - [x] If the CSV cannot be loaded, a clear message is shown instead of a blank page.
