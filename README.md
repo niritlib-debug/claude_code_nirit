@@ -20,7 +20,11 @@ Open the link in any browser, on a computer or a phone. Nothing to install.
 - **Recent joiners** with onboarding progress
 - Time-range buttons: 4, 8 or 12 weeks
 
-The data is **mock data** (fictional people). A CSV format for real data is defined in the spec and planned for the next version.
+## The data
+
+Every number comes from one CSV file, [`data/employees.csv`](data/employees.csv): one row per employee. It holds **mock data** (fictional people): 140 rows, of which 136 are full-time employees and 4 are contractors or interns that the dashboard ignores. The columns and rules are in [SPEC.md §6.2](SPEC.md).
+
+To use other data, replace that file with one that has the same columns. **Do not put real employee data in this public repo.**
 
 ## Run it on your own computer
 
@@ -30,7 +34,7 @@ No install and no build step. From this folder:
 python3 -m http.server 5173
 ```
 
-Then open http://localhost:5173 in a browser.
+Then open http://localhost:5173 in a browser. (Double-clicking `index.html` does not work, because browsers do not let a page read the CSV file that way. The page shows a message if you try.)
 
 ## Files
 
@@ -40,7 +44,7 @@ Then open http://localhost:5173 in a browser.
 | [Practice.md](Practice.md) | How we save work: commit and push after every change (in Hebrew) |
 | `index.html` | The page |
 | `styles.css` | Colors, fonts, layout |
-| `app.js` | Charts, numbers and interaction |
-| `data/mock.js` | The mock data |
+| `app.js` | Reads the CSV, works out the numbers, draws the charts |
+| `data/employees.csv` | The mock data, one row per employee |
 | `icons/icon.svg` | The Urban logo (placeholder) |
 | `manifest.webmanifest`, `sw.js` | Let the dashboard be added to a phone's home screen |

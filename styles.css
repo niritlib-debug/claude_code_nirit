@@ -250,6 +250,17 @@ h1 {
   line-height: 1.2;
 }
 
+.notice { border-color: var(--pink-500); background: var(--pink-100); }
+.notice[hidden] { display: none; }
+.notice code {
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: #fff;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  word-break: break-word;
+}
+
 /* ---------- KPIs ---------- */
 
 .kpis {

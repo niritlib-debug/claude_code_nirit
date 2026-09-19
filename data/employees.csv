@@ -1,0 +1,141 @@
+employee_id,full_name,role,department,employment_type,start_date,onboarding_progress,onboarding_status
+U-1001,Vered Uzan,Mobile Engineer,Engineering,full-time,2026-06-29,100,completed
+U-1002,Rina Rubin,Backend Engineer,Engineering,full-time,2026-07-01,100,completed
+U-1003,Shir Kaplan,QA Engineer,Engineering,full-time,2026-07-03,100,completed
+U-1004,Ravid Gindi,UX Researcher,Product & Design,full-time,2026-07-03,100,completed
+U-1005,Nir Vaknin,Sales Development Rep,Sales,full-time,2026-07-03,100,completed
+U-1006,Ben Mor,Customer Success Manager,Customer Success,full-time,2026-07-03,100,completed
+U-1007,Nir Friedman,Data Engineer,Engineering,full-time,2026-07-06,100,completed
+U-1008,Hila Elkayam,UX Researcher,Product & Design,full-time,2026-07-06,100,completed
+U-1009,Liat Nachum,Onboarding Specialist,Customer Success,full-time,2026-07-08,100,completed
+U-1010,Bar Dahan,Security Engineer,Engineering,full-time,2026-07-09,100,completed
+U-1011,Idan Fried,Frontend Engineer,Engineering,full-time,2026-07-09,100,completed
+U-1012,Ido Rubin,Data Engineer,Engineering,full-time,2026-07-09,100,completed
+U-1013,Dor Halevi,Sales Development Rep,Sales,full-time,2026-07-09,100,completed
+U-1014,Sara Zohar,Account Executive,Sales,full-time,2026-07-10,100,completed
+U-1015,Jonas Golan,Brand Designer,Marketing,full-time,2026-07-10,100,completed
+U-1016,Mia Dayan,DevOps Engineer,Engineering,full-time,2026-07-13,100,completed
+U-1017,Omri Israeli,HR Coordinator,G&A,full-time,2026-07-14,100,completed
+U-1018,Tamir Mor,QA Engineer,Engineering,full-time,2026-07-16,100,completed
+U-1019,Ziv Segal,Product Designer,Product & Design,full-time,2026-07-16,100,completed
+U-1020,Tal Ohana,Sales Development Rep,Sales,full-time,2026-07-16,100,completed
+U-1021,Noy Eshel,DevOps Engineer,Engineering,full-time,2026-07-17,100,completed
+U-1022,Noy Golan,Brand Designer,Marketing,full-time,2026-07-17,100,completed
+U-1023,Vered Eshel,Account Executive,Sales,full-time,2026-07-20,100,completed
+U-1024,Itai Yosef,Sales Development Rep,Sales,full-time,2026-07-21,100,completed
+U-1025,Idan Danino,Support Engineer,Customer Success,full-time,2026-07-21,100,completed
+U-1026,Shir Halevi,Product Designer,Product & Design,full-time,2026-07-22,100,completed
+U-1027,Sagi Mor,Frontend Engineer,Engineering,full-time,2026-07-23,100,completed
+U-1028,Bar Ohana,Mobile Engineer,Engineering,full-time,2026-07-23,100,completed
+U-1029,Noy Ivri,UX Researcher,Product & Design,full-time,2026-07-23,100,completed
+U-1030,Vered Amsalem,Mobile Engineer,Engineering,full-time,2026-07-24,100,completed
+U-1031,Nadav Ohana,Backend Engineer,Engineering,full-time,2026-07-24,100,completed
+U-1032,Idan Amar,Mobile Engineer,Engineering,full-time,2026-07-24,100,completed
+U-1033,Aviv Perl,Growth Marketer,Marketing,full-time,2026-07-24,100,completed
+U-1034,Emma Kaplan,Support Engineer,Customer Success,full-time,2026-07-27,100,completed
+U-1035,Karin Nachum,Backend Engineer,Engineering,full-time,2026-07-29,100,completed
+U-1036,Nir Rosen,Solutions Engineer,Sales,full-time,2026-07-29,100,completed
+U-1037,Yonatan Perl,Brand Designer,Marketing,full-time,2026-07-29,100,completed
+U-1038,Rina Perl,DevOps Engineer,Engineering,full-time,2026-07-30,100,completed
+U-1039,Shir Amsalem,Security Engineer,Engineering,full-time,2026-07-30,100,completed
+U-1040,Dan Edri,Product Manager,Product & Design,full-time,2026-07-30,100,completed
+U-1041,Lihi Jacobs,Sales Development Rep,Sales,full-time,2026-07-30,100,completed
+U-1042,Nir Dayan,Backend Engineer,Engineering,full-time,2026-08-03,100,completed
+U-1043,Yoav Sasson,QA Engineer,Engineering,full-time,2026-08-03,100,completed
+U-1044,Yoav Harari,Frontend Engineer,Engineering,full-time,2026-08-03,100,completed
+U-1045,Rotem Lavi,Recruiter,G&A,full-time,2026-08-03,100,completed
+U-1046,Sara Uzan,UX Researcher,Product & Design,full-time,2026-08-04,100,completed
+U-1047,Aviv Navon,Sales Development Rep,Sales,full-time,2026-08-04,100,completed
+U-1048,Roni Sasson,Support Engineer,Customer Success,full-time,2026-08-04,100,completed
+U-1049,Dor Friedman,Mobile Engineer,Engineering,full-time,2026-08-05,100,completed
+U-1050,Rina Kaplan,Brand Designer,Marketing,full-time,2026-08-05,100,completed
+U-1051,Ziv Friedman,Frontend Engineer,Engineering,full-time,2026-08-06,100,completed
+U-1052,Rotem Yosef,Security Engineer,Engineering,full-time,2026-08-07,100,completed
+U-1053,Tal Perl,Product Designer,Product & Design,full-time,2026-08-07,100,completed
+U-1054,Dana Eshel,Sales Development Rep,Sales,full-time,2026-08-07,100,completed
+U-1055,Itai Klein,Solutions Engineer,Sales,full-time,2026-08-07,100,completed
+U-1056,Anat Fried,DevOps Engineer,Engineering,full-time,2026-08-10,100,completed
+U-1057,Bar Edri,Solutions Engineer,Sales,full-time,2026-08-11,100,completed
+U-1058,Amir Halevi,Customer Success Manager,Customer Success,full-time,2026-08-11,100,completed
+U-1059,Aviv Golan,Mobile Engineer,Engineering,full-time,2026-08-12,100,completed
+U-1060,Nir Dahan,Mobile Engineer,Engineering,full-time,2026-08-12,100,completed
+U-1061,Lihi Nachum,Backend Engineer,Engineering,full-time,2026-08-13,100,completed
+U-1062,Tamir Halevi,Finance Analyst,G&A,full-time,2026-08-13,100,completed
+U-1063,Oren Dahan,Backend Engineer,Engineering,full-time,2026-08-14,100,completed
+U-1064,Noy Pinto,UX Researcher,Product & Design,full-time,2026-08-14,100,completed
+U-1065,Roni Tal,Product Manager,Product & Design,full-time,2026-08-14,100,completed
+U-1066,Lena Nachum,Sales Development Rep,Sales,full-time,2026-08-14,100,completed
+U-1067,Mia Harari,Content Marketer,Marketing,full-time,2026-08-14,100,completed
+U-1068,Zoe Segal,Backend Engineer,Engineering,full-time,2026-08-18,100,completed
+U-1069,Maor Yosef,Frontend Engineer,Engineering,full-time,2026-08-18,100,completed
+U-1070,Eli Fried,Sales Development Rep,Sales,full-time,2026-08-19,100,completed
+U-1071,Or Perl,Account Executive,Sales,full-time,2026-08-19,100,completed
+U-1072,Or Rosen,Growth Marketer,Marketing,full-time,2026-08-19,100,completed
+U-1073,Elad Biton,Frontend Engineer,Engineering,full-time,2026-08-20,100,completed
+U-1074,Yonatan Navon,Frontend Engineer,Engineering,full-time,2026-08-21,100,completed
+U-1075,Michal Klein,Product Designer,Product & Design,full-time,2026-08-21,100,completed
+U-1076,Oren Malka,Support Engineer,Customer Success,full-time,2026-08-21,100,completed
+U-1077,Liam Pinto,Frontend Engineer,Engineering,full-time,2026-08-24,100,completed
+U-1078,Meir Weiss,Account Executive,Sales,full-time,2026-08-24,100,completed
+U-1079,Keren Fried,Onboarding Specialist,Customer Success,full-time,2026-08-24,100,completed
+U-1080,Rina Dahan,HR Coordinator,G&A,full-time,2026-08-24,100,completed
+U-1081,Guy Friedman,Security Engineer,Engineering,full-time,2026-08-25,100,completed
+U-1082,Chen Feldman,UX Researcher,Product & Design,full-time,2026-08-25,100,completed
+U-1083,Tal Zohar,Solutions Engineer,Sales,full-time,2026-08-25,100,completed
+U-1084,Omri Lavi,Security Engineer,Engineering,full-time,2026-08-26,100,completed
+U-1085,Shir Carmi,UX Researcher,Product & Design,full-time,2026-08-26,100,completed
+U-1086,Amit Amar,Solutions Engineer,Sales,full-time,2026-08-26,100,completed
+U-1087,Zoe Elkayam,Backend Engineer,Engineering,full-time,2026-08-27,100,completed
+U-1088,Eden Lavi,Content Marketer,Marketing,full-time,2026-08-27,100,completed
+U-1089,Meir Segal,Backend Engineer,Engineering,full-time,2026-08-28,100,completed
+U-1090,Meir Amsalem,DevOps Engineer,Engineering,full-time,2026-08-28,100,completed
+U-1091,Bar Carmi,Product Designer,Product & Design,full-time,2026-08-28,100,completed
+U-1092,Adam Kaplan,Data Engineer,Engineering,full-time,2026-08-31,100,completed
+U-1093,Hadas Golan,Backend Engineer,Engineering,full-time,2026-08-31,100,completed
+U-1094,Carmen Biton,Data Engineer,Engineering,full-time,2026-08-31,100,completed
+U-1095,Ido Edri,Sales Development Rep,Sales,full-time,2026-08-31,100,completed
+U-1096,Itai Danino,Growth Marketer,Marketing,full-time,2026-08-31,100,completed
+U-1097,Yoav Klein,Data Contractor,Engineering,contractor,2026-08-31,100,completed
+U-1098,Eden Weiss,Data Engineer,Engineering,full-time,2026-09-02,100,completed
+U-1099,Michal Friedman,Security Engineer,Engineering,full-time,2026-09-02,100,completed
+U-1100,Tamir Rubin,Account Executive,Sales,full-time,2026-09-02,100,completed
+U-1101,Maor Zohar,Solutions Engineer,Sales,full-time,2026-09-02,100,completed
+U-1102,Hila Mor,Growth Marketer,Marketing,full-time,2026-09-02,100,completed
+U-1103,Uri Gabay,Data Engineer,Engineering,full-time,2026-09-03,100,completed
+U-1104,Shahar Biton,Product Designer,Product & Design,full-time,2026-09-03,100,completed
+U-1105,Karin Dayan,Support Engineer,Customer Success,full-time,2026-09-03,100,completed
+U-1106,Ravid Jacobs,Data Engineer,Engineering,full-time,2026-09-04,100,completed
+U-1107,Aviv Fried,QA Engineer,Engineering,full-time,2026-09-04,100,completed
+U-1108,Amir Ivri,UX Researcher,Product & Design,full-time,2026-09-04,100,completed
+U-1109,Gal Eshel,Product Designer,Product & Design,full-time,2026-09-04,100,completed
+U-1110,Rotem Elkayam,Finance Analyst,G&A,full-time,2026-09-04,100,completed
+U-1111,Dana Segal,Backend Engineer,Engineering,full-time,2026-09-07,60,in-progress
+U-1112,Omri Weiss,Onboarding Specialist,Customer Success,full-time,2026-09-07,100,completed
+U-1113,Michal Hazan,QA Engineer,Engineering,full-time,2026-09-08,80,in-progress
+U-1114,Amit Uzan,DevOps Engineer,Engineering,full-time,2026-09-08,90,in-progress
+U-1115,Alina Amsalem,Product Manager,Product & Design,full-time,2026-09-08,100,completed
+U-1116,Alina Yosef,Account Executive,Sales,full-time,2026-09-08,60,in-progress
+U-1117,Yael Shapiro,Content Marketer,Marketing,full-time,2026-09-08,100,completed
+U-1118,Avi Ben-David,Finance Analyst,G&A,full-time,2026-09-08,100,completed
+U-1119,Shir Golan,Marketing Intern,Marketing,intern,2026-09-08,60,in-progress
+U-1120,Idan Dahan,Solutions Engineer,Sales,full-time,2026-09-10,90,in-progress
+U-1121,Eden Feldman,Frontend Engineer,Engineering,full-time,2026-09-11,60,in-progress
+U-1122,Alina Laufer,Data Engineer,Engineering,full-time,2026-09-11,80,in-progress
+U-1123,Mia Weiss,UX Researcher,Product & Design,full-time,2026-09-11,100,completed
+U-1124,Ravid Rosen,Account Executive,Sales,full-time,2026-09-11,60,in-progress
+U-1125,Maya Cohen,Backend Engineer,Engineering,full-time,2026-09-14,20,in-progress
+U-1126,Daniel Levi,Frontend Engineer,Engineering,full-time,2026-09-14,20,in-progress
+U-1127,Lior Peretz,Data Engineer,Engineering,full-time,2026-09-14,45,in-progress
+U-1128,Anat Amsalem,Data Engineer,Engineering,full-time,2026-09-14,35,in-progress
+U-1129,Yuval Vaknin,Security Engineer,Engineering,full-time,2026-09-14,25,in-progress
+U-1130,Tamar Katz,Customer Success Manager,Customer Success,full-time,2026-09-14,30,in-progress
+U-1131,Shahar Uzan,DevOps Engineer,Engineering,full-time,2026-09-15,16,in-progress
+U-1132,Noa Mizrahi,Product Designer,Product & Design,full-time,2026-09-15,35,in-progress
+U-1133,Aviv Ivri,UX Researcher,Product & Design,full-time,2026-09-15,19,in-progress
+U-1134,Omar Haddad,Account Executive,Sales,full-time,2026-09-15,0,pre-boarding
+U-1135,Lihi Uzan,Solutions Engineer,Sales,full-time,2026-09-16,15,in-progress
+U-1136,Lena Sasson,Solutions Engineer,Sales,full-time,2026-09-16,14,in-progress
+U-1137,Dana Rosen,UX Contractor,Product & Design,contractor,2026-09-16,10,in-progress
+U-1138,Or Gabay,Growth Marketer,Marketing,full-time,2026-09-17,7,in-progress
+U-1139,Ben Navon,Software Engineering Intern,Engineering,intern,2026-09-17,10,in-progress
+U-1140,Yonatan Biton,Recruiter,G&A,full-time,2026-09-18,0,pre-boarding

@@ -2,7 +2,7 @@
 
 **Company:** Urban (tech company)
 **Audience:** HR / People team
-**Status:** v1 built with mock data · spec last updated 2026-09-19
+**Status:** v1 built, data read from a CSV file (mock data) · spec last updated 2026-09-19
 **Language:** English
 
 ## 1. Purpose
@@ -18,13 +18,13 @@ The main question the dashboard answers: *"How many people did we onboard this w
 **In scope**
 - One dashboard page that works on **desktop and mobile** (responsive web app; installable as a PWA so it feels like an app on a phone).
 - **Company-wide view only** (no per-site or per-team filter).
-- **Mock data only** in v1, bundled with the app. No backend, no login. Real data will come from a **CSV file** (see §6.2).
+- Data is read from a **CSV file**, `data/employees.csv` (§6.2). It holds mock data for now; real data can replace it later. No backend, no login.
 - Urban branding: logo and company name in the header (§5.4).
 - Read-only: choose a time range and explore, no editing.
 
 **Out of scope (v1)**
 - Real HR system integration (Workday, BambooHR, etc.)
-- Loading a real CSV file (defined in §6.2, planned for the next version)
+- Uploading or picking a CSV from the page (the file is part of the site)
 - Per-site or per-team filters
 - Authentication / roles
 - Native iOS / Android store apps
@@ -61,7 +61,7 @@ The main question the dashboard answers: *"How many people did we onboard this w
 - On mobile: show every 2nd x-axis label if space is tight, but keep all bars and all value labels.
 
 ### 4.4 Hires by department
-- **Horizontal bars** (one per department) for the selected range, sorted high → low.
+- **Horizontal bars** (one per department) for the selected range, sorted high → low. An **Other** row appears only if the CSV has a department name that is not one of the six.
 - Each row: department name, bar, count, and % of total.
 
 ### 4.5 Recent joiners list
@@ -144,7 +144,9 @@ The main question the dashboard answers: *"How many people did we onboard this w
 
 ## 6. Data
 
-### 6.1 Mock data (v1, built)
+### 6.1 Mock data (v1)
+
+The mock data is a CSV file, `data/employees.csv` (format in §6.2). It has **140 rows**: 136 fictional full-time employees, plus 4 contractors and interns who must be **ignored** (to prove that only full-time employees are counted). The dashboard computes the numbers below from that file.
 
 Weeks start on Monday; `W38` is the current week (Sep 14–20, 2026). Departments: Engineering (Eng), Product & Design (P&D), Sales, Marketing (Mkt), Customer Success (CS), G&A.
 
@@ -169,45 +171,48 @@ Weeks start on Monday; `W38` is the current week (Sep 14–20, 2026). Department
 - Last 4 weeks (W35–W38): **60**, vs. 43 in W31–W34 (▲ 40%)
 - Weekly average: **11.3**; best week: **18** (W36)
 
-**Recent joiners (fictional)**
+**Recent joiners the UI must show** (fictional people; the contractor who started Sep 16 and the intern who started Sep 17 are correctly left out)
 
 | Name | Role | Dept | Start | Progress | Status |
 |---|---|---|---|---|---|
-| Maya Cohen | Backend Engineer | Eng | Sep 14 | 20 % | In progress |
-| Daniel Levi | Frontend Engineer | Eng | Sep 14 | 20 % | In progress |
-| Noa Mizrahi | Product Designer | P&D | Sep 15 | 35 % | In progress |
+| Yonatan Biton | Recruiter | G&A | Sep 18 | 0 % | Pre-boarding |
+| Or Gabay | Growth Marketer | Marketing | Sep 17 | 7 % | In progress |
+| Lihi Uzan | Solutions Engineer | Sales | Sep 16 | 15 % | In progress |
+| Lena Sasson | Solutions Engineer | Sales | Sep 16 | 14 % | In progress |
+| Shahar Uzan | DevOps Engineer | Engineering | Sep 15 | 16 % | In progress |
+| Noa Mizrahi | Product Designer | Product & Design | Sep 15 | 35 % | In progress |
+| Aviv Ivri | UX Researcher | Product & Design | Sep 15 | 19 % | In progress |
 | Omar Haddad | Account Executive | Sales | Sep 15 | 0 % | Pre-boarding |
-| Lior Peretz | Data Engineer | Eng | Sep 14 | 45 % | In progress |
-| Tamar Katz | Customer Success Manager | CS | Sep 14 | 30 % | In progress |
-| Yael Shapiro | Content Marketer | Mkt | Sep 8 | 100 % | Completed |
-| Avi Ben-David | Finance Analyst | G&A | Sep 8 | 100 % | Completed |
 
-Data lives in a single file (`data/mock.js`) and the UI reads it only through `getWeeklyHires()`, so the source can be swapped without touching the UI.
+The UI reads the data only through `getWeeklyHires()`, so the source can be swapped without touching the rest of the UI.
 
-### 6.2 CSV file (real data, next version)
+### 6.2 CSV file
 
-Real data will come from a **CSV file**, one row per employee. Not built yet; this is the agreed format.
+All numbers come from a **CSV file**, one row per employee. Today it holds the mock data; real data can replace it later (see §12 for the privacy rule).
 
 - File: `data/employees.csv`, UTF-8, comma-separated, first row = column names, dates as `YYYY-MM-DD`.
 
 | Column | Required | Example | Meaning |
 |---|---|---|---|
-| `employee_id` | yes | `U-1042` | Unique ID |
+| `employee_id` | yes | `U-1042` | Unique ID (kept for the future; the dashboard does not display it) |
 | `full_name` | yes | `Maya Cohen` | Shown in Recent joiners |
 | `role` | yes | `Backend Engineer` | Shown in Recent joiners |
 | `department` | yes | `Engineering` | One of the six departments above; any other value is grouped as **Other** |
 | `employment_type` | yes | `full-time` | Only `full-time` (any capitalization) is counted; every other value is ignored |
 | `start_date` | yes | `2026-09-14` | Decides the week (Monday–Sunday) the person is counted in |
-| `onboarding_progress` | no | `20` | 0–100, default 0 |
+| `onboarding_progress` | no | `20` | 0–100, default 0; values outside the range are cut to 0 or 100 |
 | `onboarding_status` | no | `in-progress` | `pre-boarding`, `in-progress` or `completed`. If empty: start date in the future → pre-boarding, progress 100 → completed, otherwise in-progress |
 
 Rules
 - The dashboard groups rows by start-date week in the browser; no other processing is needed.
-- The current week is the week that contains today's date.
-- Recent joiners = the 8 rows with the latest start date.
-- A row with a missing or invalid `start_date` is skipped and reported in the browser console.
-- Reading a CSV needs the page to be served over http(s) (GitHub Pages or `python3 -m http.server`); a page opened straight from disk cannot read files.
-- **Privacy:** a real employee CSV must **not** be committed to a public GitHub repo. Keep it out of git (`.gitignore`) or use a private repo.
+- Column names are matched ignoring capitalization and extra spaces; `department` and `employment_type` values are also matched ignoring capitalization.
+- The chart covers the **last 12 weeks** ending with the current week. Weeks with no hires show `0`. Rows outside those 12 weeks are not counted.
+- **Current week:** the week that contains the "as of" date. For the mock file this date is frozen at **2026-09-19** (constant `AS_OF` at the top of `app.js`) so the dashboard looks the same whenever it is opened. Set `AS_OF` to `null` to use today's date, which is what real data needs.
+- Rows with a start date after the current week are not counted yet.
+- **Recent joiners** = the 8 full-time employees with the latest start date up to the end of the current week; people with the same start date keep their order in the file.
+- A row with a missing or invalid `start_date` is skipped and reported in the browser console, with its row number.
+- Reading a CSV needs the page to be served over http(s) (GitHub Pages or `python3 -m http.server`). A page opened straight from disk cannot read files, so it shows a pink message that says what to do.
+- **Privacy:** a real employee CSV must **not** be committed to a public GitHub repo. Keep it out of git (`.gitignore`) or use a private repo. The CSV in this repo is fictional.
 
 Example
 ```csv
@@ -223,11 +228,11 @@ U-1044,Dana Rosen,Freelance Designer,Product & Design,contractor,2026-09-14,10,i
 - Changing the range button updates all KPIs, the chart, and the department breakdown instantly (no page reload).
 - KPI "change" arrows: ▲ for increase, ▼ for decrease, ▬ for no change; always with a number and the words "vs last week / vs prior 4 weeks".
 - Empty or zero weeks still render a bar slot with the label `0`.
-- Loading state is not needed (data is local), but the code should read data through one function (`getWeeklyHires()`) so an async version is easy to add.
+- The CSV is loaded once when the page opens, through one function (`getWeeklyHires()`). If it cannot be loaded, a pink message explains why and what to do (§6.2).
 
 ## 8. Technical approach
 
-- Static site, **no build step and no backend**: `index.html`, `styles.css`, `app.js`, `data/mock.js`, `icons/icon.svg` (Urban logo).
+- Static site, **no build step and no backend**: `index.html`, `styles.css`, `app.js`, `data/employees.csv`, `icons/icon.svg` (Urban logo).
 - Charts: hand-drawn **inline SVG** (no chart library, zero dependencies).
 - CSS custom properties for the palette and type scale in §5; CSS Grid for the layout, breakpoints at 640 px and 1024 px.
 - PWA: `manifest.webmanifest` + simple service worker so it can be added to a phone's home screen and opened like an app.
@@ -251,8 +256,11 @@ Checked in the browser on 2026-09-19 (v1).
 - [x] All buttons are at least 56 px tall.
 - [x] Layout is usable at 375 px width with no horizontal page scroll, and uses the full width nicely at 1440 px.
 - [x] Purple **and** pink shades are clearly visible in cards, buttons, and charts.
-- [x] Runs from mock data with no calls to any API.
+- [x] Reads every number from `data/employees.csv`, with no calls to any API.
 - [x] The Urban logo and name appear in the header on desktop and mobile.
+- [x] Contractors and interns in the CSV are not counted, and do not appear in Recent joiners.
+- [x] The CSV reader handles quoted commas and quotes, Windows line endings, a byte-order mark, an unknown department (goes to Other), out-of-range progress, future start dates, and bad or missing dates (row skipped and reported).
+- [x] If the CSV cannot be loaded, a clear message is shown instead of a blank page.
 
 ## 11. Decisions
 
@@ -262,7 +270,7 @@ Confirmed 2026-09-19:
 2. **What counts as "added":** the employee's **start date**.
 3. **Who is counted:** **full-time employees only** (no contractors or interns).
 4. **Scope of the view:** **company-wide only**; no per-site or per-team filter.
-5. **Real data source:** a **CSV file** (format in §6.2).
+5. **Data source:** a **CSV file** (format in §6.2). The mock data is also a CSV, so real data can replace it without code changes.
 6. **Language:** **English** only (no Hebrew / right-to-left version).
 7. **Branding:** company name **Urban**, with a logo in the header (§5.4).
 8. **Delivery:** the code is committed and pushed to the GitHub repo, and the repo link is shared with the teacher (§12).
@@ -272,11 +280,11 @@ Confirmed 2026-09-19:
 - Repository: https://github.com/niritlib-debug/claude_code_nirit (**public**, so the teacher can open it without an invite)
 - Live dashboard (GitHub Pages, served from the `main` branch, root folder): https://niritlib-debug.github.io/claude_code_nirit/
 - Every push to `main` republishes the live dashboard automatically (about a minute).
-- Only mock data is in the repo, and it is public. **Never commit real employee data** (see §6.2); when the CSV is added, the dashboard would have to be hosted somewhere private instead of on public GitHub Pages.
+- Only fictional data is in the repo, and it is public. **Never commit real employee data** (see §6.2); once a real CSV is used, the dashboard must be hosted somewhere private instead of on public GitHub Pages.
 
 ## 13. Next steps
 
-1. Load real data from the CSV file (§6.2).
+1. Replace the mock CSV with real data, and set `AS_OF` to `null` in `app.js` (§6.2). Keep the real file out of public GitHub (§12).
 2. Replace the placeholder logo with Urban's official logo (§5.4).
 3. Before real employee data is used, decide where the dashboard is hosted privately (public GitHub Pages is only suitable for mock data).
 
@@ -291,3 +299,4 @@ Confirmed 2026-09-19:
 | 2026-09-19 | Added Urban branding and logo (§5.4), CSV data format (§6.2), delivery via GitHub (§12), company-wide scope, English only. Layout notes brought in line with the built dashboard. |
 | 2026-09-19 | Repo made public and the dashboard published with GitHub Pages; live link added (§12). Checked live on desktop and mobile. |
 | 2026-09-19 | Added `Practice.md`: every change is committed and pushed right away (working agreement, no change to the dashboard). |
+| 2026-09-19 | Mock data moved into `data/employees.csv` (140 rows) and the dashboard now reads and parses the CSV (§6). Removed `data/mock.js`. Added the frozen "as of" date, the Other department, the load-error message, and the new Recent joiners list. Numbers are unchanged. |

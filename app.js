@@ -2,18 +2,38 @@
 (function () {
   'use strict';
 
-  const DATA = window.HR_DATA;
-  const DEPTS = DATA.departments;
+  const CSV_URL = 'data/employees.csv';
+
+  // The mock CSV is frozen at this date so the dashboard looks the same whenever it is opened.
+  // Set to null to use today's date instead (for real data).
+  const AS_OF = '2026-09-19';
+
+  const MAX_WEEKS = 12;
+  const RECENT_COUNT = 8;
   const DAY = 24 * 60 * 60 * 1000;
+
+  const DEPTS = [
+    { key: 'engineering', name: 'Engineering', color: '#9B5CFF' },
+    { key: 'product & design', name: 'Product & Design', color: '#FF4DAF' },
+    { key: 'sales', name: 'Sales', color: '#C9A0FF' },
+    { key: 'marketing', name: 'Marketing', color: '#FFA6DA' },
+    { key: 'customer success', name: 'Customer Success', color: '#6A1FD0' },
+    { key: 'g&a', name: 'G&A', color: '#D6187F' },
+    { key: 'other', name: 'Other', color: '#FF7AC6' } // any department name not listed above
+  ];
+  const OTHER = 'other';
+
   const STATUS = {
     pre: { label: 'Pre-boarding', cls: 'chip--pre' },
     progress: { label: 'In progress', cls: 'chip--progress' },
     done: { label: 'Completed', cls: 'chip--done' }
   };
+  const STATUS_FROM_CSV = { 'pre-boarding': 'pre', 'in-progress': 'progress', completed: 'done' };
 
   const shortDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
   const state = { weeks: 12 };
   let allWeeks = [];
+  let recentJoiners = [];
   let lastChartWidth = 0;
 
   const $ = (sel) => document.querySelector(sel);
@@ -21,18 +41,127 @@
   const sum = (arr) => arr.reduce((a, b) => a + b, 0);
   const deptName = (key) => DEPTS.find((d) => d.key === key).name;
 
-  // Single entry point for the data. Swap the body for an API call later.
-  function getWeeklyHires() {
-    return DATA.weeks.map((w) => {
-      const start = new Date(w.start + 'T00:00:00Z');
-      const end = new Date(start.getTime() + 6 * DAY);
-      return {
-        id: w.id,
-        counts: w.counts,
-        total: sum(DEPTS.map((d) => w.counts[d.key] || 0)),
-        label: shortDate.format(start) + ' – ' + shortDate.format(end)
-      };
+  /* ---------- Data: CSV -> employees -> weeks ---------- */
+
+  // Minimal CSV parser: quoted fields, "" escapes, commas/newlines inside quotes, CRLF, BOM.
+  function parseCsv(text) {
+    const rows = [];
+    let row = [];
+    let field = '';
+    let quoted = false;
+    const endRow = () => {
+      row.push(field);
+      field = '';
+      if (row.length > 1 || row[0] !== '') rows.push(row);
+      row = [];
+    };
+    text = text.replace(/^﻿/, '');
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (quoted) {
+        if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
+        else if (c === '"') quoted = false;
+        else field += c;
+      } else if (c === '"') quoted = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        endRow();
+      } else field += c;
+    }
+    if (field !== '' || row.length) endRow();
+    return rows;
+  }
+
+  function parseDate(iso) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+    const date = new Date(iso + 'T00:00:00Z');
+    return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== iso ? null : date;
+  }
+
+  const mondayOf = (date) => new Date(date.getTime() - ((date.getUTCDay() + 6) % 7) * DAY);
+
+  function isoWeekNumber(date) {
+    const t = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+    return Math.ceil(((t - yearStart) / DAY + 1) / 7);
+  }
+
+  // Turns CSV text into employee objects. Rows without a valid start_date are skipped and reported.
+  function toEmployees(csvText, today) {
+    const [header, ...lines] = parseCsv(csvText);
+    if (!header) return [];
+    const col = header.map((h) => h.trim().toLowerCase());
+    const employees = [];
+    const skipped = [];
+
+    lines.forEach((cells, i) => {
+      const get = (name) => (cells[col.indexOf(name)] || '').trim();
+      const start = parseDate(get('start_date'));
+      if (!start) { skipped.push('row ' + (i + 2) + ': invalid or missing start_date'); return; }
+
+      const deptKey = get('department').toLowerCase();
+      const progress = Math.min(100, Math.max(0, parseInt(get('onboarding_progress'), 10) || 0));
+      const status = STATUS_FROM_CSV[get('onboarding_status').toLowerCase()] ||
+        (start > today ? 'pre' : progress >= 100 ? 'done' : 'progress');
+
+      employees.push({
+        name: get('full_name'),
+        role: get('role'),
+        dept: DEPTS.some((d) => d.key === deptKey) ? deptKey : OTHER,
+        fullTime: get('employment_type').toLowerCase() === 'full-time',
+        start,
+        progress,
+        status
+      });
     });
+
+    if (skipped.length) console.warn('Skipped ' + skipped.length + ' CSV row(s):\n' + skipped.join('\n'));
+    return employees;
+  }
+
+  // Only full-time employees count. "Now" is AS_OF (or today when AS_OF is null).
+  function buildModel(employees, today) {
+    const fullTime = employees.filter((e) => e.fullTime);
+    const thisMonday = mondayOf(today);
+
+    const weeks = [];
+    for (let i = MAX_WEEKS - 1; i >= 0; i--) {
+      const start = new Date(thisMonday.getTime() - i * 7 * DAY);
+      const end = new Date(start.getTime() + 6 * DAY);
+      const counts = {};
+      DEPTS.forEach((d) => { counts[d.key] = 0; });
+      fullTime.forEach((e) => {
+        if (e.start >= start && e.start <= end) counts[e.dept] += 1;
+      });
+      weeks.push({
+        id: 'W' + String(isoWeekNumber(start)).padStart(2, '0'),
+        counts,
+        total: sum(DEPTS.map((d) => counts[d.key])),
+        label: shortDate.format(start) + ' – ' + shortDate.format(end),
+        year: end.getUTCFullYear()
+      });
+    }
+
+    // Latest starters who have already joined (start date up to the end of the current week).
+    const endOfThisWeek = new Date(thisMonday.getTime() + 6 * DAY);
+    const recent = fullTime
+      .filter((e) => e.start <= endOfThisWeek)
+      .map((e, i) => ({ e, i }))
+      .sort((a, b) => b.e.start - a.e.start || a.i - b.i)
+      .slice(0, RECENT_COUNT)
+      .map((x) => x.e);
+
+    return { weeks, recent };
+  }
+
+  // Single entry point for the data. Swap the body for an API call later.
+  async function getWeeklyHires() {
+    const response = await fetch(CSV_URL, { cache: 'no-cache' });
+    if (!response.ok) throw new Error(CSV_URL + ' returned HTTP ' + response.status);
+    const today = AS_OF ? parseDate(AS_OF) : parseDate(new Date().toISOString().slice(0, 10));
+    return buildModel(toEmployees(await response.text(), today), today);
   }
 
   function deltaText(current, previous, suffix) {
@@ -230,6 +359,7 @@
   function renderDepartments(weeks) {
     const rows = DEPTS
       .map((d) => ({ d, n: sum(weeks.map((w) => w.counts[d.key] || 0)) }))
+      .filter((r) => r.d.key !== OTHER || r.n > 0)
       .sort((a, b) => b.n - a.n);
     const total = sum(rows.map((r) => r.n));
     const max = Math.max(1, rows[0].n);
@@ -259,10 +389,7 @@
   }
 
   function renderJoiners() {
-    const people = DATA.joiners.map((p) => ({
-      ...p,
-      startLabel: shortDate.format(new Date(p.start + 'T00:00:00Z'))
-    }));
+    const people = recentJoiners.map((p) => ({ ...p, startLabel: shortDate.format(p.start) }));
 
     $('#joiners-table').innerHTML =
       '<table class="people"><thead><tr>' +
@@ -292,7 +419,7 @@
     const last = weeks[weeks.length - 1];
     const startText = first.label.split(' – ')[0];
     const endText = last.label.split(' – ')[1];
-    $('#range-label').textContent = startText + ' – ' + endText + ', 2026 · ' + weeks.length + ' weeks';
+    $('#range-label').textContent = startText + ' – ' + endText + ', ' + last.year + ' · ' + weeks.length + ' weeks';
   }
 
   function renderAccessibleTable(weeks) {
@@ -313,8 +440,24 @@
     renderDepartments(weeks);
   }
 
-  function init() {
-    allWeeks = getWeeklyHires();
+  function showLoadError(error) {
+    console.error(error);
+    const notice = $('#notice');
+    notice.hidden = false;
+    notice.innerHTML =
+      '<strong>The dashboard could not load its data.</strong> ' +
+      'It needs <code>' + esc(CSV_URL) + '</code>, and browsers only allow that when the page is opened from a web server ' +
+      '(not by double-clicking <code>index.html</code>). Open the live link, or run ' +
+      '<code>python3 -m http.server 5173</code> in the project folder and visit <code>http://localhost:5173</code>.';
+  }
+
+  async function init() {
+    try {
+      ({ weeks: allWeeks, recent: recentJoiners } = await getWeeklyHires());
+    } catch (error) {
+      showLoadError(error);
+      return;
+    }
     document.querySelectorAll('.seg button').forEach((btn) => {
       btn.addEventListener('click', () => {
         state.weeks = Math.min(Number(btn.dataset.weeks), allWeeks.length);
