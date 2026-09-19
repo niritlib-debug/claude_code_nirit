@@ -269,15 +269,16 @@ Confirmed 2026-09-19:
 
 ## 12. Delivery
 
-- Repository: https://github.com/niritlib-debug/claude_code_nirit
-- The repo is currently **private**. For the teacher to open the link, either add the teacher as a collaborator (Settings → Collaborators) or make the repo public.
-- Only mock data is in the repo. Never commit real employee data (see §6.2).
+- Repository: https://github.com/niritlib-debug/claude_code_nirit (**public**, so the teacher can open it without an invite)
+- Live dashboard (GitHub Pages, served from the `main` branch, root folder): https://niritlib-debug.github.io/claude_code_nirit/
+- Every push to `main` republishes the live dashboard automatically (about a minute).
+- Only mock data is in the repo, and it is public. **Never commit real employee data** (see §6.2); when the CSV is added, the dashboard would have to be hosted somewhere private instead of on public GitHub Pages.
 
 ## 13. Next steps
 
 1. Load real data from the CSV file (§6.2).
 2. Replace the placeholder logo with Urban's official logo (§5.4).
-3. Optional: publish the dashboard with GitHub Pages so it opens as a live web page, not only as code.
+3. Before real employee data is used, decide where the dashboard is hosted privately (public GitHub Pages is only suitable for mock data).
 
 **Open questions:** none for v1.
 
@@ -288,3 +289,4 @@ Confirmed 2026-09-19:
 | 2026-09-19 | First spec: purpose, scope, design system, mock data. |
 | 2026-09-19 | Decisions confirmed: web app (not native), start date, full-time only. Dashboard v1 built and checked. |
 | 2026-09-19 | Added Urban branding and logo (§5.4), CSV data format (§6.2), delivery via GitHub (§12), company-wide scope, English only. Layout notes brought in line with the built dashboard. |
+| 2026-09-19 | Repo made public and the dashboard published with GitHub Pages; live link added (§12). Checked live on desktop and mobile. |

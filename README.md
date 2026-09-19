@@ -4,6 +4,12 @@ A dashboard for the People team at **Urban** that shows **how many new full-time
 
 Built with Claude Code from a written spec. It works on desktop and on a phone, in bright purple and pink with large dark text and big buttons.
 
+## See it live
+
+**https://niritlib-debug.github.io/claude_code_nirit/**
+
+Open the link in any browser, on a computer or a phone. Nothing to install.
+
 ## What it shows
 
 - **New hires this week**, with the change vs. last week
@@ -16,7 +22,7 @@ Built with Claude Code from a written spec. It works on desktop and on a phone, 
 
 The data is **mock data** (fictional people). A CSV format for real data is defined in the spec and planned for the next version.
 
-## Run it
+## Run it on your own computer
 
 No install and no build step. From this folder:
 
