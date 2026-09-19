@@ -77,3 +77,10 @@ The first version of the project, built in this order: the spec was written, thr
 - The old Hebrew instructions were removed. The rule they described still applies: commit and push every change, then log it here.
 - README file table and the SPEC change log were updated to describe the file as a change log.
 - Files: `Practice.md`, `README.md`, `SPEC.md`
+
+### 11 · 17:36 · [`3cccfe1`](https://github.com/niritlib-debug/claude_code_nirit/commit/3cccfe1) · Give the 8 weeks button a different purple
+- The **8 weeks** button is now a deeper purple (`#B47CFF`, the palette's `--violet-400`) when it is not selected. Before, all three range buttons were the same lavender (`#C9A0FF`). The hover color of that button is the lighter lavender.
+- When 8 weeks is selected it still turns pink like the other two, and the text stays dark `#1E0B36` (contrast 6.3:1).
+- SPEC section 5.3 and the SPEC change log updated.
+- **Checked:** in the browser the three buttons show lavender, deeper purple and pink (12 weeks selected); selecting 8 weeks turns it pink; all buttons are still 64 px tall.
+- Files: `styles.css`, `SPEC.md`
