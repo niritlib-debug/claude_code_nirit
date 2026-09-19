@@ -2,7 +2,7 @@
 
 **Company:** Urban (tech company)
 **Audience:** HR / People team
-**Status:** v1 built, data read from a CSV file (mock data) · spec last updated 2026-09-19
+**Status:** v1 built; data read from a CSV file (mock data) or an uploaded CSV · spec last updated 2026-09-19
 **Language:** English
 
 ## 1. Purpose
@@ -18,13 +18,15 @@ The main question the dashboard answers: *"How many people did we onboard this w
 **In scope**
 - One dashboard page that works on **desktop and mobile** (responsive web app; installable as a PWA so it feels like an app on a phone).
 - **Company-wide view only** (no per-site or per-team filter).
-- Data is read from a **CSV file**, `data/employees.csv` (§6.2). It holds mock data for now; real data can replace it later. No backend, no login.
+- Data is read from a **CSV file**, `data/employees.csv` (§6.2). It holds mock data for now. No backend, no login.
+- An **Upload CSV button** lets the user look at different data by choosing their own CSV file (§4.6). The file is read in the browser only.
 - Urban branding: logo and company name in the header (§5.4).
 - Read-only: choose a time range and explore, no editing.
 
 **Out of scope (v1)**
 - Real HR system integration (Workday, BambooHR, etc.)
-- Uploading or picking a CSV from the page (the file is part of the site)
+- Saving an uploaded file (it lives only until the page is refreshed) or sending it to a server
+- Excel files (`.xlsx`); the file must be saved as CSV first
 - Per-site or per-team filters
 - Authentication / roles
 - Native iOS / Android store apps
@@ -44,7 +46,9 @@ The main question the dashboard answers: *"How many people did we onboard this w
 - Brand block: **Urban logo + the name "Urban"**, with a small pink tag "People team dashboard" under the name
 - Title: **"New Hires Onboarding"**
 - Subtitle: date range shown, e.g. "Jun 29 – Sep 20, 2026"
+- Data-source line under the date range: says which data is showing (see §4.6)
 - Time-range buttons (big, segmented): **4 weeks · 8 weeks · 12 weeks** (default: 12)
+- **Upload CSV** button under the range buttons, with a "Use sample data" button next to it once a file is loaded, and the note "Your file stays in your browser. It is not uploaded anywhere."
 
 ### 4.2 KPI cards (3)
 | Card | Value | Detail line |
@@ -67,6 +71,25 @@ The main question the dashboard answers: *"How many people did we onboard this w
 ### 4.5 Recent joiners list
 - The 8 most recent starters: name, role, department, start date, onboarding progress bar (0–100 %), status chip (**Pre-boarding / In progress / Completed**).
 - Desktop: table. Mobile: stacked cards.
+
+### 4.6 Upload your own CSV
+
+Purpose: let the user look at different data (for example a real HR export) without touching the code or the repo.
+
+- **Upload CSV** (big button, pink, with an upload icon) opens the computer's file picker, limited to `.csv` files.
+- The file must use the columns in §6.2. It is read **in the browser**: it is not sent to any server and not saved. Refreshing the page goes back to the sample data.
+- When a file loads, everything updates at once: KPIs, chart, departments, Recent joiners and the date range. The chosen range (4 / 8 / 12 weeks) stays.
+- The **data-source line** shows what is on screen, for example:
+  - `Sample data (data/employees.csv) · 136 full-time employees · 4 not full-time (ignored)`
+  - `Your file: hr-export.csv · 20 full-time employees · 1 row skipped (invalid start date)`
+- **Use sample data** (shown only while an uploaded file is on screen) goes back to the built-in sample.
+- **Which week is "this week":** an uploaded file uses **today's date**. If the file has no hires in the 12 weeks before today (an old file), the dashboard shows the 12 weeks up to the file's latest start date and says so in a note under the data-source line.
+- **A file that cannot be used** shows a pink message and leaves the current data on screen. The message says what is wrong:
+  - not a `.csv` file (for example `.xlsx`)
+  - larger than 5 MB
+  - empty, or missing a needed column (`full_name`, `role`, `department`, `employment_type`, `start_date`), with a hint if the columns are separated by semicolons
+  - no full-time employee with a valid start date
+- Choosing a good file afterwards clears the message. Choosing the same file twice works.
 
 ## 5. Visual design
 
@@ -115,6 +138,7 @@ The main question the dashboard answers: *"How many people did we onboard this w
 - Default: `--violet-300` fill. **Selected**: `--pink-400` fill with a slightly raised shadow.
 - Hover/press: lift 2 px, brighten fill; visible focus ring (4 px `--violet-700`).
 - Time-range buttons are full-width segmented on mobile, inline on desktop.
+- **Upload CSV** and **Use sample data** use the same big pill style (56 / 64 px tall, 20 px text, `--ink` outline). Upload is `--pink-300` (hover `--pink-400`), Use sample data is `--violet-300`. On phones each is a full-width button; on desktop they sit side by side, right-aligned.
 
 ### 5.4 Branding (Urban)
 - **Logo:** a rounded square with the pink→violet gradient, a dark **"U"** and a small dot above its right stem (a new arrival). File: `icons/icon.svg`.
@@ -207,12 +231,13 @@ Rules
 - The dashboard groups rows by start-date week in the browser; no other processing is needed.
 - Column names are matched ignoring capitalization and extra spaces; `department` and `employment_type` values are also matched ignoring capitalization.
 - The chart covers the **last 12 weeks** ending with the current week. Weeks with no hires show `0`. Rows outside those 12 weeks are not counted.
-- **Current week:** the week that contains the "as of" date. For the mock file this date is frozen at **2026-09-19** (constant `AS_OF` at the top of `app.js`) so the dashboard looks the same whenever it is opened. Set `AS_OF` to `null` to use today's date, which is what real data needs.
+- **Current week:** the week that contains the "as of" date. For the built-in sample file this date is frozen at **2026-09-19** (constant `AS_OF` at the top of `app.js`) so the dashboard looks the same whenever it is opened. An **uploaded** file always uses today's date (with the old-file fallback in §4.6). If the built-in file is ever replaced with real data, set `AS_OF` to `null`.
+- The built-in sample and an uploaded file go through exactly the same reading and checks; only the "as of" date differs.
 - Rows with a start date after the current week are not counted yet.
 - **Recent joiners** = the 8 full-time employees with the latest start date up to the end of the current week; people with the same start date keep their order in the file.
 - A row with a missing or invalid `start_date` is skipped and reported in the browser console, with its row number.
-- Reading a CSV needs the page to be served over http(s) (GitHub Pages or `python3 -m http.server`). A page opened straight from disk cannot read files, so it shows a pink message that says what to do.
-- **Privacy:** a real employee CSV must **not** be committed to a public GitHub repo. Keep it out of git (`.gitignore`) or use a private repo. The CSV in this repo is fictional.
+- Reading the built-in CSV needs the page to be served over http(s) (GitHub Pages or `python3 -m http.server`). A page opened straight from disk cannot read it, so it shows a pink message that says what to do, and mentions the Upload CSV button.
+- **Privacy:** a real employee CSV must **not** be committed to a public GitHub repo. Keep it out of git (`.gitignore`) or use a private repo. The CSV in this repo is fictional. An uploaded file is different: it stays in the browser and is never sent or saved (§4.6).
 
 Example
 ```csv
@@ -228,7 +253,8 @@ U-1044,Dana Rosen,Freelance Designer,Product & Design,contractor,2026-09-14,10,i
 - Changing the range button updates all KPIs, the chart, and the department breakdown instantly (no page reload).
 - KPI "change" arrows: ▲ for increase, ▼ for decrease, ▬ for no change; always with a number and the words "vs last week / vs prior 4 weeks".
 - Empty or zero weeks still render a bar slot with the label `0`.
-- The CSV is loaded once when the page opens, through one function (`getWeeklyHires()`). If it cannot be loaded, a pink message explains why and what to do (§6.2).
+- The built-in CSV is loaded once when the page opens, through one function (`getWeeklyHires()`). If it cannot be loaded, a pink message explains why and what to do (§6.2); Upload CSV still works.
+- An uploaded file is read with the browser's `File` API and handled in memory; nothing is stored or sent (§4.6).
 
 ## 8. Technical approach
 
@@ -244,6 +270,7 @@ U-1044,Dana Rosen,Freelance Designer,Product & Design,contractor,2026-09-14,10,i
 - Every chart has a text alternative: a visually hidden table with the same weekly numbers.
 - Buttons are real `<button>` elements, keyboard reachable, with visible focus.
 - Respect `prefers-reduced-motion` (no animations when set).
+- The data-source line is announced to screen readers when it changes (a file was loaded); error messages use `role="alert"`.
 
 ## 10. Acceptance criteria
 
@@ -261,6 +288,12 @@ Checked in the browser on 2026-09-19 (v1).
 - [x] Contractors and interns in the CSV are not counted, and do not appear in Recent joiners.
 - [x] The CSV reader handles quoted commas and quotes, Windows line endings, a byte-order mark, an unknown department (goes to Other), out-of-range progress, future start dates, and bad or missing dates (row skipped and reported).
 - [x] If the CSV cannot be loaded, a clear message is shown instead of a blank page.
+- [x] Upload CSV: a valid file replaces the data everywhere (KPIs, chart, departments, Recent joiners, date range) and keeps the chosen range; "Use sample data" brings the sample back.
+- [x] Upload CSV: contractors are ignored, rows with a bad date are skipped and counted in the data-source line, an unknown department goes to Other.
+- [x] Upload CSV: an old file (no hires in the 12 weeks before today) falls back to the file's own latest date and says so.
+- [x] Upload CSV: a wrong file type, an empty file, a file over 5 MB, missing columns, a semicolon-separated file, and a file with no full-time rows each show a clear message and leave the current data on screen.
+- [x] The upload buttons are 56 px tall (64 px on desktop) and full width on a 375 px phone, with no horizontal scroll.
+- [ ] Not tested: opening `index.html` from disk in a real tab (the sample cannot load there; Upload CSV is expected to still work).
 
 ## 11. Decisions
 
@@ -274,17 +307,19 @@ Confirmed 2026-09-19:
 6. **Language:** **English** only (no Hebrew / right-to-left version).
 7. **Branding:** company name **Urban**, with a logo in the header (§5.4).
 8. **Delivery:** the code is committed and pushed to the GitHub repo, and the repo link is shared with the teacher (§12).
+9. **Upload CSV button:** requested so the user can look at different data. Design choices made with it: the file is read in the browser only, it is temporary (gone after a refresh), and there is a one-click way back to the sample (§4.6).
 
 ## 12. Delivery
 
 - Repository: https://github.com/niritlib-debug/claude_code_nirit (**public**, so the teacher can open it without an invite)
 - Live dashboard (GitHub Pages, served from the `main` branch, root folder): https://niritlib-debug.github.io/claude_code_nirit/
 - Every push to `main` republishes the live dashboard automatically (about a minute).
-- Only fictional data is in the repo, and it is public. **Never commit real employee data** (see §6.2); once a real CSV is used, the dashboard must be hosted somewhere private instead of on public GitHub Pages.
+- Only fictional data is in the repo, and it is public. **Never commit real employee data** (see §6.2).
+- To look at real data, use **Upload CSV** (§4.6): the file stays in the viewer's browser and never reaches GitHub. If Urban's rules require the tool itself to be internal, host it privately instead of on public GitHub Pages.
 
 ## 13. Next steps
 
-1. Replace the mock CSV with real data, and set `AS_OF` to `null` in `app.js` (§6.2). Keep the real file out of public GitHub (§12).
+1. Look at real data with **Upload CSV** (§4.6) and keep the real file out of public GitHub (§12).
 2. Replace the placeholder logo with Urban's official logo (§5.4).
 3. Before real employee data is used, decide where the dashboard is hosted privately (public GitHub Pages is only suitable for mock data).
 
@@ -300,3 +335,4 @@ Confirmed 2026-09-19:
 | 2026-09-19 | Repo made public and the dashboard published with GitHub Pages; live link added (§12). Checked live on desktop and mobile. |
 | 2026-09-19 | Added `Practice.md`: every change is committed and pushed right away (working agreement, no change to the dashboard). |
 | 2026-09-19 | Mock data moved into `data/employees.csv` (140 rows) and the dashboard now reads and parses the CSV (§6). Removed `data/mock.js`. Added the frozen "as of" date, the Other department, the load-error message, and the new Recent joiners list. Numbers are unchanged. |
+| 2026-09-19 | Added the **Upload CSV** button, "Use sample data", the data-source line and the privacy note (§4.6, §5.3). Uploaded files are read in the browser, use today's date (with an old-file fallback), and are checked with clear error messages. |

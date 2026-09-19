@@ -29,12 +29,28 @@
         </div>
         <h1>New Hires Onboarding</h1>
         <p class="sub" id="range-label" aria-live="polite"></p>
+        <p class="source" id="source-label" aria-live="polite">Loading data…</p>
+        <p class="source-note" id="source-note" hidden></p>
       </div>
 
-      <div class="seg" role="group" aria-label="Time range">
-        <button type="button" data-weeks="4" aria-pressed="false">4 weeks</button>
-        <button type="button" data-weeks="8" aria-pressed="false">8 weeks</button>
-        <button type="button" data-weeks="12" aria-pressed="true">12 weeks</button>
+      <div class="head__controls">
+        <div class="seg" role="group" aria-label="Time range">
+          <button type="button" data-weeks="4" aria-pressed="false">4 weeks</button>
+          <button type="button" data-weeks="8" aria-pressed="false">8 weeks</button>
+          <button type="button" data-weeks="12" aria-pressed="true">12 weeks</button>
+        </div>
+
+        <div class="upload">
+          <button type="button" class="btn btn--upload" id="upload-btn">
+            <svg class="btn__icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+              <path d="M12 16V4m0 0-5 5m5-5 5 5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Upload CSV
+          </button>
+          <button type="button" class="btn" id="reset-btn" hidden>Use sample data</button>
+          <input type="file" id="file-input" accept=".csv,text/csv" hidden>
+        </div>
+        <p class="privacy">Your file stays in your browser. It is not uploaded anywhere.</p>
       </div>
     </header>
 
