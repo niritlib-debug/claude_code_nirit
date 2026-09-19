@@ -241,6 +241,10 @@ h1 {
   transform: translateY(-2px);
 }
 
+/* 8 weeks: a deeper purple than 4 and 12 weeks (still turns pink when selected) */
+.seg button[data-weeks="8"]:not([aria-pressed="true"]) { background: var(--violet-400); }
+.seg button[data-weeks="8"]:not([aria-pressed="true"]):hover { background: var(--violet-300); }
+
 /* Download CSV: same big pill, in pink so it stands apart from the range buttons */
 .btn--download { background: var(--pink-300); }
 .btn--download:hover { background: var(--pink-400); }

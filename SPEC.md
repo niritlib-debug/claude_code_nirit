@@ -126,6 +126,7 @@ Purpose: let the user take the mock data away as a CSV file (for example to open
 - **Big**: minimum height **56 px** (64 px on desktop), minimum tap target 48 × 48 px, pill shape (`border-radius: 999px`), 3 px `--ink` outline is optional but consistent.
 - Font 20 px / 700, `--ink` text (18 px on phones narrower than 480 px so "12 weeks" stays on one line).
 - Default: `--violet-300` fill. **Selected**: `--pink-400` fill with a slightly raised shadow.
+- The **8 weeks** button is a different, deeper purple when not selected: `--violet-400` (hover: `--violet-300`). When selected it turns `--pink-400` like the other two.
 - Hover/press: lift 2 px, brighten fill; visible focus ring (4 px `--violet-700`).
 - Time-range buttons are full-width segmented on mobile, inline on desktop.
 - **Download CSV** uses the same big pill style (56 / 64 px tall, 20 px text, `--ink` outline and text) in `--pink-300` (hover `--pink-400`). Full width on phones; on desktop it sits under the range buttons, right-aligned.
@@ -320,3 +321,4 @@ Confirmed 2026-09-19:
 | 2026-09-19 | Mock data moved into `data/employees.csv` (140 rows) and the dashboard now reads and parses the CSV (§6). Removed `data/mock.js`. Added the frozen "as of" date, the Other department, the load-error message, and the new Recent joiners list. Numbers are unchanged. |
 | 2026-09-19 | An Upload CSV button was added, then removed the same day: the request was for a **Download** button. Added **Download CSV**, which saves the mock data as `urban-employees-mock.csv` (§4.6, §5.3). |
 | 2026-09-19 | `Practice.md` changed from working instructions to a **change log**: every change is written there after each commit and push (no change to the dashboard). |
+| 2026-09-19 | The **8 weeks** button now uses a different, deeper purple (`--violet-400`) when not selected (§5.3). |
