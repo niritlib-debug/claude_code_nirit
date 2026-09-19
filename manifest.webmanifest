@@ -1,0 +1,14 @@
+{
+  "name": "Urban New Hires Onboarding",
+  "short_name": "Urban Hires",
+  "description": "Weekly count of new full-time employees at Urban, for the People team.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FBF5FF",
+  "theme_color": "#FF7AC6",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
