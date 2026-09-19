@@ -319,3 +319,4 @@ Confirmed 2026-09-19:
 | 2026-09-19 | Added `Practice.md`: every change is committed and pushed right away (working agreement, no change to the dashboard). |
 | 2026-09-19 | Mock data moved into `data/employees.csv` (140 rows) and the dashboard now reads and parses the CSV (§6). Removed `data/mock.js`. Added the frozen "as of" date, the Other department, the load-error message, and the new Recent joiners list. Numbers are unchanged. |
 | 2026-09-19 | An Upload CSV button was added, then removed the same day: the request was for a **Download** button. Added **Download CSV**, which saves the mock data as `urban-employees-mock.csv` (§4.6, §5.3). |
+| 2026-09-19 | `Practice.md` changed from working instructions to a **change log**: every change is written there after each commit and push (no change to the dashboard). |

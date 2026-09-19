@@ -46,7 +46,7 @@ Then open http://localhost:5173 in a browser. (Double-clicking `index.html` does
 | File | What it is |
 |---|---|
 | [SPEC.md](SPEC.md) | The full specification: goals, design rules, data, decisions, acceptance checks |
-| [Practice.md](Practice.md) | How we save work: commit and push after every change (in Hebrew) |
+| [Practice.md](Practice.md) | The change log: every change made to the project, added after each commit and push |
 | `index.html` | The page |
 | `styles.css` | Colors, fonts, layout |
 | `app.js` | Reads the CSV, works out the numbers, draws the charts |
