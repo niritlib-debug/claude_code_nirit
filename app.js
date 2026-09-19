@@ -11,8 +11,6 @@
   const MAX_WEEKS = 12;
   const RECENT_COUNT = 8;
   const DAY = 24 * 60 * 60 * 1000;
-  const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
-  const REQUIRED_COLUMNS = ['full_name', 'role', 'department', 'employment_type', 'start_date'];
 
   const DEPTS = [
     { key: 'engineering', name: 'Engineering', color: '#9B5CFF' },
@@ -36,7 +34,6 @@
   const state = { weeks: 12 };
   let allWeeks = [];
   let recentJoiners = [];
-  let sampleDataset = null;
   let lastChartWidth = 0;
 
   const $ = (sel) => document.querySelector(sel);
@@ -91,25 +88,11 @@
     return Math.ceil(((t - yearStart) / DAY + 1) / 7);
   }
 
-  // A problem with the data that is worth showing to the person as-is.
-  class DataError extends Error {}
-
-  // Turns CSV text into employee objects.
-  // Throws a DataError when a needed column is missing. Rows without a valid start_date are skipped.
-  function toEmployees(csvText) {
+  // Turns CSV text into employee objects. Rows without a valid start_date are skipped and reported.
+  function toEmployees(csvText, today) {
     const [header, ...lines] = parseCsv(csvText);
-    if (!header) throw new DataError('The file is empty. It needs a first row with the column names.');
+    if (!header) return [];
     const col = header.map((h) => h.trim().toLowerCase());
-
-    const missing = REQUIRED_COLUMNS.filter((name) => !col.includes(name));
-    if (missing.length) {
-      const semicolons = header.length === 1 && header[0].includes(';');
-      throw new DataError(
-        'These columns are missing: ' + missing.join(', ') + '.' +
-        (semicolons ? ' The file looks separated by semicolons; save it as a comma-separated CSV.' : '')
-      );
-    }
-
     const employees = [];
     const skipped = [];
 
@@ -119,22 +102,26 @@
       if (!start) { skipped.push('row ' + (i + 2) + ': invalid or missing start_date'); return; }
 
       const deptKey = get('department').toLowerCase();
+      const progress = Math.min(100, Math.max(0, parseInt(get('onboarding_progress'), 10) || 0));
+      const status = STATUS_FROM_CSV[get('onboarding_status').toLowerCase()] ||
+        (start > today ? 'pre' : progress >= 100 ? 'done' : 'progress');
+
       employees.push({
         name: get('full_name'),
         role: get('role'),
         dept: DEPTS.some((d) => d.key === deptKey) ? deptKey : OTHER,
         fullTime: get('employment_type').toLowerCase() === 'full-time',
         start,
-        progress: Math.min(100, Math.max(0, parseInt(get('onboarding_progress'), 10) || 0)),
-        csvStatus: STATUS_FROM_CSV[get('onboarding_status').toLowerCase()] || null
+        progress,
+        status
       });
     });
 
     if (skipped.length) console.warn('Skipped ' + skipped.length + ' CSV row(s):\n' + skipped.join('\n'));
-    return { employees, skipped: skipped.length };
+    return employees;
   }
 
-  // Only full-time employees count. "Now" is the `today` date that is passed in.
+  // Only full-time employees count. "Now" is AS_OF (or today when AS_OF is null).
   function buildModel(employees, today) {
     const fullTime = employees.filter((e) => e.fullTime);
     const thisMonday = mondayOf(today);
@@ -164,53 +151,17 @@
       .map((e, i) => ({ e, i }))
       .sort((a, b) => b.e.start - a.e.start || a.i - b.i)
       .slice(0, RECENT_COUNT)
-      .map((x) => ({
-        ...x.e,
-        // A status in the CSV wins; otherwise work it out from the dates and progress.
-        status: x.e.csvStatus || (x.e.start > today ? 'pre' : x.e.progress >= 100 ? 'done' : 'progress')
-      }));
+      .map((x) => x.e);
 
     return { weeks, recent };
   }
 
-  const todayUtc = () => parseDate(new Date().toISOString().slice(0, 10));
-
-  // Everything the page shows, worked out from CSV text.
-  // The built-in sample is frozen at AS_OF; an uploaded file uses today's date.
-  function makeDataset(csvText, { name, isSample }) {
-    const { employees, skipped } = toEmployees(csvText);
-    const fullTime = employees.filter((e) => e.fullTime);
-    if (!fullTime.length) {
-      throw new DataError('No full-time employees with a valid start date were found. ' +
-        'Check the employment_type column (it must say full-time) and the start_date column (YYYY-MM-DD).');
-    }
-
-    let today = isSample && AS_OF ? parseDate(AS_OF) : todayUtc();
-    let model = buildModel(employees, today);
-    let note = '';
-
-    // An older file would show an empty dashboard, so show the 12 weeks up to its latest start date instead.
-    if (!isSample && sum(model.weeks.map((w) => w.total)) === 0) {
-      const started = fullTime.filter((e) => e.start <= today).map((e) => e.start.getTime());
-      if (started.length) {
-        today = new Date(Math.max(...started));
-        model = buildModel(employees, today);
-        note = 'There are no hires in the 12 weeks before today, so this shows the 12 weeks up to ' +
-          shortDate.format(today) + ', ' + today.getUTCFullYear() + ', the latest start date in the file.';
-      }
-    }
-
-    return {
-      ...model,
-      source: { name, isSample, fullTime: fullTime.length, notFullTime: employees.length - fullTime.length, skipped, note }
-    };
-  }
-
-  // Single entry point for the built-in data. Swap the body for an API call later.
+  // Single entry point for the data. Swap the body for an API call later.
   async function getWeeklyHires() {
     const response = await fetch(CSV_URL, { cache: 'no-cache' });
     if (!response.ok) throw new Error(CSV_URL + ' returned HTTP ' + response.status);
-    return makeDataset(await response.text(), { name: CSV_URL, isSample: true });
+    const today = AS_OF ? parseDate(AS_OF) : parseDate(new Date().toISOString().slice(0, 10));
+    return buildModel(toEmployees(await response.text(), today), today);
   }
 
   function deltaText(current, previous, suffix) {
@@ -478,7 +429,6 @@
   }
 
   function render() {
-    if (!allWeeks.length) return;
     const weeks = allWeeks.slice(-state.weeks);
     document.querySelectorAll('.seg button').forEach((btn) => {
       btn.setAttribute('aria-pressed', String(Number(btn.dataset.weeks) === state.weeks));
@@ -490,111 +440,45 @@
     renderDepartments(weeks);
   }
 
-  /* ---------- Data source: sample file or an uploaded file ---------- */
-
-  const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
-
-  function renderSource(source) {
-    const parts = [
-      source.isSample ? 'Sample data (' + source.name + ')' : 'Your file: ' + source.name,
-      plural(source.fullTime, 'full-time employee')
-    ];
-    if (source.notFullTime) parts.push(source.notFullTime + ' not full-time (ignored)');
-    if (source.skipped) parts.push(plural(source.skipped, 'row') + ' skipped (invalid start date)');
-    $('#source-label').textContent = parts.join(' · ');
-
-    const note = $('#source-note');
-    note.textContent = source.note;
-    note.hidden = !source.note;
-    $('#reset-btn').hidden = source.isSample;
-  }
-
-  function showNotice(title, detail) {
-    const notice = $('#notice');
-    const strong = document.createElement('strong');
-    strong.textContent = title;
-    notice.replaceChildren(strong, ' ' + detail);
-    notice.hidden = false;
-  }
-
-  const hideNotice = () => { $('#notice').hidden = true; };
-
-  function applyDataset(dataset) {
-    allWeeks = dataset.weeks;
-    recentJoiners = dataset.recent;
-    renderJoiners();
-    render();
-    renderSource(dataset.source);
-  }
-
-  async function onFileChosen(event) {
-    const input = event.target;
-    const file = input.files && input.files[0];
-    input.value = ''; // lets the same file be chosen again
-    if (!file) return;
-
-    try {
-      if (!/\.csv$/i.test(file.name) && !/csv/i.test(file.type)) {
-        throw new DataError('Please choose a .csv file. An Excel file (.xlsx) must be saved as CSV first.');
-      }
-      if (file.size > MAX_UPLOAD_BYTES) throw new DataError('That file is larger than 5 MB.');
-      // The file is read here in the browser. It is never sent anywhere.
-      applyDataset(makeDataset(await file.text(), { name: file.name, isSample: false }));
-      hideNotice();
-    } catch (error) {
-      console.error(error);
-      showNotice('That file could not be used.',
-        error instanceof DataError ? error.message : 'It could not be read as a CSV file.');
-    }
-  }
-
   function showLoadError(error) {
     console.error(error);
     const notice = $('#notice');
     notice.hidden = false;
     notice.innerHTML =
-      '<strong>The dashboard could not load its sample data.</strong> ' +
+      '<strong>The dashboard could not load its data.</strong> ' +
       'It needs <code>' + esc(CSV_URL) + '</code>, and browsers only allow that when the page is opened from a web server ' +
       '(not by double-clicking <code>index.html</code>). Open the live link, or run ' +
-      '<code>python3 -m http.server 5173</code> in the project folder and visit <code>http://localhost:5173</code>. ' +
-      'You can also press <strong>Upload CSV</strong> and choose a file.';
+      '<code>python3 -m http.server 5173</code> in the project folder and visit <code>http://localhost:5173</code>.';
   }
 
   async function init() {
+    try {
+      ({ weeks: allWeeks, recent: recentJoiners } = await getWeeklyHires());
+    } catch (error) {
+      showLoadError(error);
+      return;
+    }
     document.querySelectorAll('.seg button').forEach((btn) => {
       btn.addEventListener('click', () => {
-        if (!allWeeks.length) return;
         state.weeks = Math.min(Number(btn.dataset.weeks), allWeeks.length);
         render();
       });
     });
-    $('#upload-btn').addEventListener('click', () => $('#file-input').click());
-    $('#file-input').addEventListener('change', onFileChosen);
-    $('#reset-btn').addEventListener('click', () => {
-      if (!sampleDataset) return;
-      applyDataset(sampleDataset);
-      hideNotice();
-    });
     bindChart();
+    renderJoiners();
+    render();
 
     if ('ResizeObserver' in window) {
       new ResizeObserver(() => {
         const w = Math.floor($('#chart').clientWidth);
-        if (allWeeks.length && w && w !== lastChartWidth) renderChart(allWeeks.slice(-state.weeks));
+        if (w && w !== lastChartWidth) renderChart(allWeeks.slice(-state.weeks));
       }).observe($('#chart'));
     } else {
-      window.addEventListener('resize', () => { if (allWeeks.length) renderChart(allWeeks.slice(-state.weeks)); });
+      window.addEventListener('resize', () => renderChart(allWeeks.slice(-state.weeks)));
     }
 
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
-    }
-
-    try {
-      sampleDataset = await getWeeklyHires();
-      applyDataset(sampleDataset);
-    } catch (error) {
-      showLoadError(error); // Upload CSV still works
     }
   }
 
