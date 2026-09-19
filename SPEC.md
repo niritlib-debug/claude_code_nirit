@@ -290,3 +290,4 @@ Confirmed 2026-09-19:
 | 2026-09-19 | Decisions confirmed: web app (not native), start date, full-time only. Dashboard v1 built and checked. |
 | 2026-09-19 | Added Urban branding and logo (§5.4), CSV data format (§6.2), delivery via GitHub (§12), company-wide scope, English only. Layout notes brought in line with the built dashboard. |
 | 2026-09-19 | Repo made public and the dashboard published with GitHub Pages; live link added (§12). Checked live on desktop and mobile. |
+| 2026-09-19 | Added `Practice.md`: every change is committed and pushed right away (working agreement, no change to the dashboard). |

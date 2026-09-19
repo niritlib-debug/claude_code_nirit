@@ -37,6 +37,7 @@ Then open http://localhost:5173 in a browser.
 | File | What it is |
 |---|---|
 | [SPEC.md](SPEC.md) | The full specification: goals, design rules, data, decisions, acceptance checks |
+| [Practice.md](Practice.md) | How we save work: commit and push after every change (in Hebrew) |
 | `index.html` | The page |
 | `styles.css` | Colors, fonts, layout |
 | `app.js` | Charts, numbers and interaction |
