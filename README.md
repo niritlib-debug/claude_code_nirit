@@ -19,17 +19,21 @@ Open the link in any browser, on a computer or a phone. Nothing to install.
 - **Hires by department**
 - **Recent joiners** with onboarding progress
 - Time-range buttons: 4, 8 or 12 weeks
-- A **Download CSV** button that saves the mock data as a CSV file
+- An **Import CSV** button to look at your own data (see below)
 
 ## The data
 
-Every number comes from one CSV file, [`data/employees.csv`](data/employees.csv): one row per employee. It holds **mock data** (fictional people): 140 rows, of which 136 are full-time employees and 4 are contractors or interns that the dashboard ignores. The columns and rules are in [SPEC.md §6.2](SPEC.md).
+By default every number comes from one CSV file, [`data/employees.csv`](data/employees.csv): one row per employee. It holds **mock data** (fictional people): 140 rows, of which 136 are full-time employees and 4 are contractors or interns that the dashboard ignores. The columns and rules are in [SPEC.md §6.2](SPEC.md).
 
-### Download the data: Download CSV
+### Look at different data: Import CSV
 
-Press **Download CSV** at the top of the page to save that file to your computer as `urban-employees-mock.csv`. It is always the whole file, the same for every time range. You can open it in Excel or any text editor.
+Press **Import CSV** at the top of the page and choose a CSV file with the same columns as `data/employees.csv`. The whole dashboard updates. Press **Use sample data** to go back.
 
-To use other data, replace `data/employees.csv` with a file that has the same columns. **Do not put real employee data in this public repo.**
+- The file is read **in your browser only**. It is not uploaded anywhere and not saved; refreshing the page returns to the sample data.
+- If the file cannot be used (not a `.csv`, missing columns, empty, over 5 MB), a pink message says what is wrong and nothing changes.
+- An imported file is counted as of **today**. If the file has no hires in the last 12 weeks, the dashboard shows the 12 weeks up to the file's latest start date and says so.
+
+**Do not put real employee data in this public repo.** Importing it in the browser is the safe way to look at it.
 
 ## Run it on your own computer
 
@@ -39,7 +43,7 @@ No install and no build step. From this folder:
 python3 -m http.server 5173
 ```
 
-Then open http://localhost:5173 in a browser. (Double-clicking `index.html` does not work, because browsers do not let a page read the CSV file that way. The page shows a message if you try.)
+Then open http://localhost:5173 in a browser. (Double-clicking `index.html` does not load the sample data, because browsers do not let a page read the CSV file that way. The page shows a message if you try.)
 
 ## Files
 

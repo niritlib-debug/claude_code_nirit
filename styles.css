@@ -198,8 +198,6 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  color: var(--ink);
-  text-decoration: none;
   min-height: var(--btn-h);
   min-width: 48px;
   padding: 0 24px;
@@ -245,15 +243,49 @@ h1 {
 .seg button[data-weeks="8"]:not([aria-pressed="true"]) { background: var(--violet-400); }
 .seg button[data-weeks="8"]:not([aria-pressed="true"]):hover { background: var(--violet-300); }
 
-/* Download CSV: same big pill, in pink so it stands apart from the range buttons */
-.btn--download { background: var(--pink-300); }
-.btn--download:hover { background: var(--pink-400); }
+.btn[hidden] { display: none; }
+
+/* Import CSV: same big pill, in pink so it stands apart from the range buttons */
+.btn--upload { background: var(--pink-300); }
+.btn--upload:hover { background: var(--pink-400); }
 .btn__icon { flex: none; }
+
+/* Import area, under the range buttons */
 
 .head__controls { display: grid; gap: 14px; }
 
+.upload {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.upload .btn { flex: 1 1 auto; }
+
+.privacy { font-size: var(--fs-small); }
+
+.source {
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 6px 14px;
+  border: 2px solid var(--violet-300);
+  border-radius: 16px;
+  background: var(--violet-100);
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+.source-note {
+  margin-top: 8px;
+  font-size: var(--fs-small);
+}
+.source-note[hidden] { display: none; }
+
 @media (min-width: 1024px) {
   .head__controls { justify-items: end; }
+  .upload { justify-content: flex-end; }
+  .upload .btn { flex: 0 0 auto; }
+  .privacy { text-align: right; }
 }
 
 /* ---------- Cards ---------- */
