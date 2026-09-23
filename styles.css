@@ -220,6 +220,15 @@ h1 {
   }
 }
 
+/* Very small phones (320–379 px, e.g. iPhone SE): a bit more room for the content */
+@media (max-width: 379px) {
+  :root { --pad: 16px; }
+  .seg { gap: 8px; }
+  .seg button { font-size: 16px; }
+  .eyebrow { white-space: nowrap; }
+  .joiners .person-card { padding: 14px; }
+}
+
 .seg button:hover,
 .btn:hover {
   background: var(--violet-400);
@@ -390,7 +399,7 @@ h1 {
 
 .chart-card { position: relative; }
 
-.chart { position: relative; width: 100%; min-height: 300px; }
+.chart { position: relative; width: 100%; min-height: 220px; }
 .chart svg { display: block; max-width: 100%; overflow: visible; }
 
 .chart text {

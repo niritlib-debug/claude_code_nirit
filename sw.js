@@ -1,5 +1,5 @@
 // Minimal offline cache so the dashboard opens like an app on a phone.
-const CACHE = 'new-hires-v2';
+const CACHE = 'new-hires-v3';
 const SHELL = [
   './',
   'index.html',
@@ -23,12 +23,15 @@ self.addEventListener('activate', (event) => {
 });
 
 // Network first (so edits show up), falling back to the cache when offline.
+// Our own files are fetched with cache: 'no-cache' so the browser checks for a newer copy
+// every time; without it a phone could keep showing an old version after an update.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  const sameOrigin = new URL(event.request.url).origin === location.origin;
   event.respondWith(
-    fetch(event.request)
+    fetch(sameOrigin ? new Request(event.request, { cache: 'no-cache' }) : event.request)
       .then((res) => {
-        if (res.ok && new URL(event.request.url).origin === location.origin) {
+        if (res.ok && sameOrigin) {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put(event.request, copy));
         }

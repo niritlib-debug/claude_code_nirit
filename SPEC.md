@@ -134,7 +134,7 @@ Purpose: let the user look at different data (for example a real HR export) with
 
 ### 5.3 Buttons & controls
 - **Big**: minimum height **56 px** (64 px on desktop), minimum tap target 48 × 48 px, pill shape (`border-radius: 999px`), 3 px `--ink` outline is optional but consistent.
-- Font 20 px / 700, `--ink` text (18 px on phones narrower than 480 px so "12 weeks" stays on one line).
+- Font 20 px / 700, `--ink` text (18 px on phones narrower than 480 px and 16 px narrower than 380 px, so "12 weeks" stays on one line with room around it).
 - Default: `--violet-300` fill. **Selected**: `--pink-400` fill with a slightly raised shadow.
 - The **8 weeks** button is a different, deeper purple when not selected: `--violet-400` (hover: `--violet-300`). When selected it turns `--pink-400` like the other two.
 - Hover/press: lift 2 px, brighten fill; visible focus ring (4 px `--violet-700`).
@@ -160,12 +160,16 @@ Purpose: let the user look at different data (for example a real HR export) with
 
 **Tablet (640–1023 px)** — hero KPI on its own full-width row, the other two KPIs side by side; chart and departments stacked; recent joiners as two-column cards.
 
-**Mobile (< 640 px)** — single column, 16 px side gutters, no horizontal page scroll:
+**Mobile (< 640 px)** — single column, 16 px side gutters, no horizontal page scroll down to 320 px wide:
 1. Urban logo + name, title, range buttons
 2. Hero KPI, then the two other KPIs
 3. Weekly chart
 4. Departments
 5. Recent joiners as cards
+
+**Very small phones (< 380 px, e.g. iPhone SE):** card padding 16 px (inner joiner cards 14 px), range-button text 16 px, and the "People team dashboard" tag kept on one line.
+
+**Phone held sideways (short screens):** the weekly chart is at most 60 % of the screen height (never below 220 px), so it fits on screen.
 
 ## 6. Data
 
@@ -282,7 +286,7 @@ Checked in the browser on 2026-09-19 (v1).
 - [x] 4 / 8 / 12-week buttons change every widget consistently.
 - [x] All text is `#1E0B36`; body text is at least 18 px, KPI numbers at least 48 px.
 - [x] All buttons are at least 56 px tall.
-- [x] Layout is usable at 375 px width with no horizontal page scroll, and uses the full width nicely at 1440 px.
+- [x] Layout is usable at 320, 360, 375, 390 and 414 px wide, sideways at 740 × 360 and on a 768 px tablet with no horizontal page scroll, and uses the full width nicely at 1440 px.
 - [x] Purple **and** pink shades are clearly visible in cards, buttons, and charts.
 - [x] Reads every number from `data/employees.csv`, with no calls to any API.
 - [x] The Urban logo and name appear in the header on desktop and mobile.
@@ -341,3 +345,4 @@ Confirmed 2026-09-19:
 | 2026-09-19 | The **8 weeks** button now uses a different, deeper purple (`--violet-400`) when not selected (§5.3). |
 | 2026-09-23 | Download CSV replaced by **Import CSV**: the file-import feature (built on 2026-09-19 as Upload CSV) is back, renamed Import CSV, with "Use sample data", the data-source line and the privacy note (§4.6, §5.3). Imported files are read in the browser, use today's date (with an old-file fallback), and are checked with clear error messages. |
 | 2026-09-23 | `Practice.md` reduced to the working rule only (every change is committed and pushed to GitHub right away); the change-log entries were removed. The history stays in git. |
+| 2026-09-23 | Mobile fixes (§5.3, §5.5): no sideways scroll on 320 px phones (the hidden chart table was wider than the screen), roomier buttons and tighter padding under 380 px, a shorter chart when the phone is held sideways, and the offline helper (`sw.js`) now checks for newer files so phones don't keep an old version. |

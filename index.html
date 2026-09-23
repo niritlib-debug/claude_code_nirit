@@ -83,11 +83,14 @@
         <h2 id="chart-title">New hires per week</h2>
         <div class="chart" id="chart"></div>
         <div class="tip" id="tip" hidden></div>
-        <table class="sr-only" id="chart-table">
-          <caption>New hires per week</caption>
-          <thead><tr><th scope="col">Week</th><th scope="col">Dates</th><th scope="col">New hires</th></tr></thead>
-          <tbody></tbody>
-        </table>
+        <!-- Screen-reader copy of the chart. Wrapped in a div because tables ignore the 1px width of .sr-only. -->
+        <div class="sr-only">
+          <table id="chart-table">
+            <caption>New hires per week</caption>
+            <thead><tr><th scope="col">Week</th><th scope="col">Dates</th><th scope="col">New hires</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </section>
 
       <section class="card dept-card" aria-labelledby="dept-title">

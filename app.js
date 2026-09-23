@@ -255,7 +255,8 @@
     hideTip();
 
     const compact = W < 520;
-    const H = compact ? 300 : 360;
+    // Shorter on short screens (a phone held sideways) so the whole chart fits on screen.
+    const H = Math.min(compact ? 300 : 360, Math.max(220, Math.round(window.innerHeight * 0.6)));
     const m = { top: 34, bottom: 44 };
     const innerH = H - m.top - m.bottom;
     const base = m.top + innerH;
