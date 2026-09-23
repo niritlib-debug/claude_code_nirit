@@ -84,3 +84,18 @@ The first version of the project, built in this order: the spec was written, thr
 - SPEC section 5.3 and the SPEC change log updated.
 - **Checked:** in the browser the three buttons show lavender, deeper purple and pink (12 weeks selected); selecting 8 weeks turns it pink; all buttons are still 64 px tall.
 - Files: `styles.css`, `SPEC.md`
+
+## 2026-09-23
+
+### 12 · no commit · Airtable connection (not finished)
+- Nirit asked to connect Claude to Airtable and create a table from `data/employees.csv`. The Airtable connector is on her account and she signed in, but in this long-running session it stayed "pending" and its tools never loaded, so no table was created.
+- Next: create the table directly in Airtable (Import → CSV file), or open a new Claude session where the connector loads.
+
+### 13 · 20:21 · [`6c7888f`](https://github.com/niritlib-debug/claude_code_nirit/commit/6c7888f) · Replace the Download CSV button with Import CSV
+- The **Download CSV** button was removed and the file-import feature came back, now called **Import CSV** (it was first built as "Upload CSV" in entry 7).
+- Import CSV opens the file picker for a `.csv` file; the whole dashboard (KPIs, chart, departments, recent joiners, date range) switches to that file. **Use sample data** goes back. A line under the date shows which data is on screen, and a note says the file stays in the browser and is not sent anywhere.
+- Bad files (not `.csv`, empty, over 5 MB, missing columns, semicolon-separated, no full-time rows) show a pink message and keep the current data.
+- The **8 weeks** purple from entry 11 was kept.
+- README and SPEC updated (4.6, 5.3, acceptance checks, decisions, change log).
+- **Checked:** the button reads "Import CSV" and is 64 px tall on desktop and full width, 56 px tall, on a 375 px phone with no sideways scrolling; importing a test file changed the dashboard and ignored a contractor; an `.xlsx` file showed the error and kept the data; Use sample data brought back the original 14 / 136; the Download button is gone.
+- Files: `app.js`, `index.html`, `styles.css`, `README.md`, `SPEC.md`
