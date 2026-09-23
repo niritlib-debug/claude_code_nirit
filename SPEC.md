@@ -340,3 +340,4 @@ Confirmed 2026-09-19:
 | 2026-09-19 | `Practice.md` changed from working instructions to a **change log**: every change is written there after each commit and push (no change to the dashboard). |
 | 2026-09-19 | The **8 weeks** button now uses a different, deeper purple (`--violet-400`) when not selected (§5.3). |
 | 2026-09-23 | Download CSV replaced by **Import CSV**: the file-import feature (built on 2026-09-19 as Upload CSV) is back, renamed Import CSV, with "Use sample data", the data-source line and the privacy note (§4.6, §5.3). Imported files are read in the browser, use today's date (with an old-file fallback), and are checked with clear error messages. |
+| 2026-09-23 | `Practice.md` reduced to the working rule only (every change is committed and pushed to GitHub right away); the change-log entries were removed. The history stays in git. |
