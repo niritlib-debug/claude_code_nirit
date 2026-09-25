@@ -20,7 +20,8 @@
     base: 'appQTrIAIwLh7M0lU', // Project Tracker
     table: 'tblULyGaP4pQHMBWn', // Employees
     name: 'Project Tracker › Employees',
-    storageKey: 'urban-airtable-token'
+    storageKey: 'urban-airtable-token',
+    refreshMs: 5 * 60 * 1000 // while connected, read the table again every 5 minutes
   };
   // CSV column name -> Airtable field name
   const AIRTABLE_FIELDS = {
@@ -52,11 +53,15 @@
   const STATUS_FROM_CSV = { 'pre-boarding': 'pre', 'in-progress': 'progress', completed: 'done' };
 
   const shortDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  const timeOfDay = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' });
   const state = { weeks: 12 };
   let allWeeks = [];
   let recentJoiners = [];
   let sampleDataset = null;
   let currentKind = 'sample'; // 'sample', 'file' or 'airtable'
+  let airtableToken = ''; // kept in memory while connected, for the 5-minute refresh
+  let refreshTimer = null;
+  let lastRefresh = 0;
   let lastChartWidth = 0;
 
   const $ = (sel) => document.querySelector(sel);
@@ -581,6 +586,7 @@
     const parts = [SOURCE_LABEL[source.kind](source.name), plural(source.fullTime, 'full-time employee')];
     if (source.notFullTime) parts.push(source.notFullTime + ' not full-time (ignored)');
     if (source.skipped) parts.push(plural(source.skipped, 'row') + ' skipped (invalid start date)');
+    if (source.updated) parts.push('updated ' + timeOfDay.format(source.updated));
     $('#source-label').textContent = parts.join(' · ');
 
     const note = $('#source-note');
@@ -604,6 +610,7 @@
 
   function applyDataset(dataset) {
     currentKind = dataset.source.kind;
+    if (currentKind !== 'airtable') stopAirtableRefresh();
     allWeeks = dataset.weeks;
     recentJoiners = dataset.recent;
     renderJoiners();
@@ -633,8 +640,32 @@
   }
 
   async function connectAirtable(token) {
-    applyDataset(makeDataset(await fetchAirtableRows(token), { name: AIRTABLE.name, kind: 'airtable' }));
+    const dataset = makeDataset(await fetchAirtableRows(token), { name: AIRTABLE.name, kind: 'airtable' });
+    dataset.source.updated = new Date();
+    applyDataset(dataset);
     hideNotice();
+    airtableToken = token;
+    lastRefresh = Date.now();
+    if (!refreshTimer) refreshTimer = setInterval(refreshAirtable, AIRTABLE.refreshMs);
+  }
+
+  function stopAirtableRefresh() {
+    clearInterval(refreshTimer);
+    refreshTimer = null;
+    airtableToken = '';
+  }
+
+  // Every 5 minutes while connected. Skipped while the tab is hidden; done on return if it is due.
+  async function refreshAirtable() {
+    if (!airtableToken || currentKind !== 'airtable' || document.hidden) return;
+    if (Date.now() - lastRefresh < AIRTABLE.refreshMs - 5000) return; // just refreshed
+    try {
+      await connectAirtable(airtableToken);
+    } catch (error) {
+      lastRefresh = Date.now(); // wait for the next turn instead of retrying at once
+      if (error.badToken) { saveToken(''); stopAirtableRefresh(); }
+      showAirtableError(error); // the data on screen stays as it was
+    }
   }
 
   function showAirtableError(error) {
@@ -709,6 +740,9 @@
     $('#airtable-btn').addEventListener('click', () => toggleAirtableForm($('#airtable-form').hidden));
     $('#airtable-cancel').addEventListener('click', () => { toggleAirtableForm(false); $('#airtable-btn').focus(); });
     $('#airtable-form').addEventListener('submit', onAirtableSubmit);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && Date.now() - lastRefresh >= AIRTABLE.refreshMs) refreshAirtable();
+    });
     bindChart();
 
     if ('ResizeObserver' in window) {
