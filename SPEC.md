@@ -102,6 +102,7 @@ Purpose: show the data that is kept in Airtable, live, without putting any secre
 - The token is **never written into the code or the repo**. Each viewer pastes their own personal access token, which should have only the `data.records:read` scope and only the Project Tracker base. It is sent only to `api.airtable.com`. With Remember ticked it is kept in the browser's local storage and the page reconnects on the next visit; otherwise it is gone after a refresh.
 - The dashboard reads every row (Airtable sends up to 100 per request, so it follows the pages) and then works exactly like an imported file: full-time only, today's date with the old-data fallback, the same checks.
 - The data-source line reads, for example: `Airtable (live): Project Tracker › Employees · 136 full-time employees · 4 not full-time (ignored)`.
+- While Airtable data is showing, the button reads **Airtable connected ✓**. When a token is remembered, opening the form shows it already filled in (as dots) with Remember ticked, so it never has to be pasted again on that device.
 - **Disconnect Airtable** goes back to the sample data and forgets a remembered token.
 - Errors show a pink message and leave the current data on screen: token not accepted (401), token cannot read the table (403/404, with a hint about the scope and base), Airtable not reachable, or any other Airtable error. A remembered token that is no longer accepted is forgotten.
 
@@ -364,3 +365,4 @@ Confirmed 2026-09-19:
 | 2026-09-23 | `Practice.md` reduced to the working rule only (every change is committed and pushed to GitHub right away); the change-log entries were removed. The history stays in git. |
 | 2026-09-23 | Mobile fixes (§5.3, §5.5): no sideways scroll on 320 px phones (the hidden chart table was wider than the screen), roomier buttons and tighter padding under 380 px, a shorter chart when the phone is held sideways, and the offline helper (`sw.js`) now checks for newer files so phones don't keep an old version. |
 | 2026-09-25 | Added **Connect Airtable** (§4.7): an Airtable **Employees** table in the Project Tracker base holds the same 140 mock rows, and the dashboard can load it live with a token pasted in the browser (never stored in the repo). |
+| 2026-09-25 | Connect Airtable clearer: the button reads "Airtable connected ✓" while connected, and a remembered token is filled into the form (§4.7). |

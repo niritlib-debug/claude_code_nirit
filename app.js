@@ -589,6 +589,7 @@
     const reset = $('#reset-btn');
     reset.hidden = source.kind === 'sample';
     reset.textContent = source.kind === 'airtable' ? 'Disconnect Airtable' : 'Use sample data';
+    $('#airtable-btn').textContent = source.kind === 'airtable' ? 'Airtable connected ✓' : 'Connect Airtable';
   }
 
   function showNotice(title, detail) {
@@ -647,7 +648,10 @@
     form.hidden = !open;
     $('#airtable-btn').setAttribute('aria-expanded', String(open));
     if (open) {
-      $('#airtable-remember').checked = Boolean(savedToken());
+      // A remembered token is filled in (shown as dots), so the viewer does not paste it again.
+      const token = savedToken();
+      $('#airtable-token').value = token;
+      $('#airtable-remember').checked = Boolean(token);
       $('#airtable-token').focus();
     } else {
       $('#airtable-token').value = '';
