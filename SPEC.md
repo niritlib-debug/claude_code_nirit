@@ -106,6 +106,7 @@ Purpose: show the data that is kept in Airtable, live, without putting any secre
 - **Refresh every 5 minutes** (rule in `Practice.md`): while connected, the dashboard reads the table again every 5 minutes and updates everything, keeping the chosen range. The data-source line ends with `updated HH:MM`. A hidden tab skips the refresh and catches up when it is shown again. A failed refresh keeps the data on screen and shows the pink message; a token that is no longer accepted stops the refresh and is forgotten.
 - **Disconnect Airtable** goes back to the sample data and forgets a remembered token.
 - Errors show a pink message and leave the current data on screen: token not accepted (401), token cannot read the table (403/404, with a hint about the scope and base), Airtable not reachable, or any other Airtable error. A remembered token that is no longer accepted is forgotten.
+- **New project managers in construction** (added 2026-09-25): a second table in the same base, **New Construction PMs** (`tbldfW8CPLQJ51bDA`; fields Name, Job title, Company, Start month, Location, LinkedIn). It was filled once from LinkedIn with the Apify Actor `harvestapi/linkedin-profile-search` (current title Project Manager, Construction industry, Israel, changed jobs recently). While connected, the dashboard shows it in a card under Recent joiners: people whose start month overlaps the **last 4 weeks**, newest first, names linking to LinkedIn. LinkedIn gives only the start month, not the day. The card is hidden when not connected, so these real names never appear in the public sample. If this table cannot be read, the card says so and the rest of the dashboard still works.
 
 ## 5. Visual design
 
@@ -368,3 +369,4 @@ Confirmed 2026-09-19:
 | 2026-09-25 | Added **Connect Airtable** (§4.7): an Airtable **Employees** table in the Project Tracker base holds the same 140 mock rows, and the dashboard can load it live with a token pasted in the browser (never stored in the repo). |
 | 2026-09-25 | Connect Airtable clearer: the button reads "Airtable connected ✓" while connected, and a remembered token is filled into the form (§4.7). |
 | 2026-09-25 | While connected to Airtable the dashboard **refreshes the data every 5 minutes** and shows the time of the last update (§4.7). Rule added to `Practice.md`. |
+| 2026-09-25 | Added **New project managers in construction** (§4.7): a New Construction PMs table in Airtable, filled from LinkedIn with Apify, shown while Airtable is connected (last 4 weeks). |

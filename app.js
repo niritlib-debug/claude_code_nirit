@@ -33,6 +33,10 @@
     onboarding_progress: 'Onboarding Progress',
     onboarding_status: 'Onboarding Status'
   };
+  // A second table in the same base, filled from LinkedIn with Apify. Shown only while Airtable is connected,
+  // so the names never appear in the public sample.
+  const PM_TABLE = 'tbldfW8CPLQJ51bDA'; // New Construction PMs
+  const PM_WEEKS = 4;
 
   const DEPTS = [
     { key: 'engineering', name: 'Engineering', color: '#9B5CFF' },
@@ -52,6 +56,7 @@
   };
   const STATUS_FROM_CSV = { 'pre-boarding': 'pre', 'in-progress': 'progress', completed: 'done' };
 
+  const monthYear = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
   const shortDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
   const timeOfDay = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' });
   const state = { weeks: 12 };
@@ -280,6 +285,58 @@
       offset = page.offset || '';
     } while (offset);
     return rows;
+  }
+
+  // Reads the New Construction PMs table. LinkedIn gives only a start month, so "the last 4 weeks"
+  // keeps everyone whose start month overlaps them, newest first.
+  async function fetchConstructionPms(token) {
+    const response = await fetch('https://api.airtable.com/v0/' + AIRTABLE.base + '/' + PM_TABLE + '?pageSize=100',
+      { headers: { Authorization: 'Bearer ' + token }, cache: 'no-store' });
+    if (!response.ok) throw new DataError('HTTP ' + response.status);
+    const page = await response.json();
+    const today = new Date();
+    const since = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) - PM_WEEKS * 7 * DAY;
+    const sinceMonth = Date.UTC(new Date(since).getUTCFullYear(), new Date(since).getUTCMonth(), 1);
+    return page.records
+      .map((r) => ({
+        name: r.fields['Name'] || '',
+        title: r.fields['Job title'] || '',
+        company: r.fields['Company'] || '',
+        location: r.fields['Location'] || '',
+        link: r.fields['LinkedIn'] || '',
+        start: r.fields['Start month'] ? new Date(r.fields['Start month'] + 'T00:00:00Z') : null
+      }))
+      .filter((p) => p.name && p.start && p.start.getTime() >= sinceMonth)
+      .sort((a, b) => b.start - a.start || a.name.localeCompare(b.name));
+  }
+
+  function renderPms(people, failed) {
+    const section = $('#pms');
+    section.hidden = false;
+    $('#pms-note').textContent = failed
+      ? 'Could not read the New Construction PMs table. Check that the token can read it.'
+      : people.length + ' started in the last ' + PM_WEEKS + ' weeks (LinkedIn shows only the start month).';
+    const nameCell = (p) => /^https:\/\/(www\.)?linkedin\.com\//.test(p.link)
+      ? '<a href="' + esc(p.link) + '" target="_blank" rel="noopener noreferrer">' + esc(p.name) + '</a>'
+      : esc(p.name);
+    $('#pms-table').innerHTML = people.length
+      ? '<table class="people"><thead><tr>' +
+        '<th scope="col">Name</th><th scope="col">Job title</th><th scope="col">Company</th>' +
+        '<th scope="col">Started</th><th scope="col">Location</th>' +
+        '</tr></thead><tbody>' +
+        people.map((p) =>
+          '<tr><td class="person">' + nameCell(p) + '</td><td>' + esc(p.title) + '</td><td>' + esc(p.company) +
+          '</td><td>' + monthYear.format(p.start) + '</td><td>' + esc(p.location) + '</td></tr>'
+        ).join('') +
+        '</tbody></table>'
+      : '';
+    $('#pms-cards').innerHTML = people.map((p) =>
+      '<li class="person-card">' +
+      '<div><div class="person">' + nameCell(p) + '</div>' +
+      '<div class="meta">' + esc(p.title) + ' · ' + esc(p.company) + '</div></div>' +
+      '<div class="meta">Started ' + monthYear.format(p.start) + ' · ' + esc(p.location) + '</div>' +
+      '</li>'
+    ).join('');
   }
 
   // The token is kept only if the viewer asks for it, and only in this browser.
@@ -610,7 +667,7 @@
 
   function applyDataset(dataset) {
     currentKind = dataset.source.kind;
-    if (currentKind !== 'airtable') stopAirtableRefresh();
+    if (currentKind !== 'airtable') { stopAirtableRefresh(); $('#pms').hidden = true; }
     allWeeks = dataset.weeks;
     recentJoiners = dataset.recent;
     renderJoiners();
@@ -643,6 +700,12 @@
     const dataset = makeDataset(await fetchAirtableRows(token), { name: AIRTABLE.name, kind: 'airtable' });
     dataset.source.updated = new Date();
     applyDataset(dataset);
+    try {
+      renderPms(await fetchConstructionPms(token), false);
+    } catch (error) {
+      console.error(error);
+      renderPms([], true); // the main dashboard still works without this table
+    }
     hideNotice();
     airtableToken = token;
     lastRefresh = Date.now();

@@ -583,3 +583,7 @@ table.people { width: 100%; border-collapse: separate; border-spacing: 0; }
     animation: none !important;
   }
 }
+
+/* New project managers in construction (only while Airtable is connected) */
+#pms[hidden] { display: none; }
+#pms .person a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }

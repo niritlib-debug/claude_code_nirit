@@ -47,6 +47,7 @@ The same data also lives in Airtable, in the **Employees** table of the **Projec
 - The token is **never in the code or the repo**. Each viewer pastes their own; it stays in their browser and is sent only to Airtable. Without a token the dashboard shows the sample data.
 - While connected, the data **refreshes every 5 minutes** (the line under the dates shows the time of the last update).
 - Airtable data is counted as of **today**, like an imported file.
+- While connected, a **New project managers in construction** card lists people from the **New Construction PMs** table (filled from LinkedIn with Apify) who started in the last 4 weeks. It is hidden without a token.
 - If the token is wrong or cannot read the table, a pink message says what to fix and the current data stays on screen.
 
 ## Run it on your own computer
