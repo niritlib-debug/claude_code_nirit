@@ -20,6 +20,7 @@ Open the link in any browser, on a computer or a phone. Nothing to install.
 - **Recent joiners** with onboarding progress
 - Time-range buttons: 4, 8 or 12 weeks
 - An **Import CSV** button to look at your own data (see below)
+- A **Connect Airtable** button to show live data from Airtable (see below)
 
 ## The data
 
@@ -34,6 +35,18 @@ Press **Import CSV** at the top of the page and choose a CSV file with the same 
 - An imported file is counted as of **today**. If the file has no hires in the last 12 weeks, the dashboard shows the 12 weeks up to the file's latest start date and says so.
 
 **Do not put real employee data in this public repo.** Importing it in the browser is the safe way to look at it.
+
+### Live data: Connect Airtable
+
+The same data also lives in Airtable, in the **Employees** table of the **Project Tracker** base. To show it live:
+
+1. In Airtable, create a personal access token at https://airtable.com/create/tokens with only the **`data.records:read`** scope and access to only the **Project Tracker** base.
+2. On the dashboard, press **Connect Airtable**, paste the token and press **Connect**.
+3. Tick **Remember on this device** to reconnect automatically next time. **Disconnect Airtable** goes back to the sample data and forgets the token.
+
+- The token is **never in the code or the repo**. Each viewer pastes their own; it stays in their browser and is sent only to Airtable. Without a token the dashboard shows the sample data.
+- Airtable data is counted as of **today**, like an imported file.
+- If the token is wrong or cannot read the table, a pink message says what to fix and the current data stays on screen.
 
 ## Run it on your own computer
 
@@ -53,7 +66,7 @@ Then open http://localhost:5173 in a browser. (Double-clicking `index.html` does
 | [Practice.md](Practice.md) | The working rule: every change is committed and pushed to GitHub right away |
 | `index.html` | The page |
 | `styles.css` | Colors, fonts, layout |
-| `app.js` | Reads the CSV, works out the numbers, draws the charts |
+| `app.js` | Reads the CSV (or Airtable), works out the numbers, draws the charts |
 | `data/employees.csv` | The mock data, one row per employee |
 | `icons/icon.svg` | The Urban logo (placeholder) |
 | `manifest.webmanifest`, `sw.js` | Let the dashboard be added to a phone's home screen |

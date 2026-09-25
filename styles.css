@@ -272,6 +272,46 @@ h1 {
 
 .privacy { font-size: var(--fs-small); }
 
+/* Connect Airtable: the deeper purple, so the three buttons are easy to tell apart */
+.btn--airtable { background: var(--violet-400); }
+.btn--airtable:hover { background: var(--violet-300); }
+
+.airtable-form {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 560px;
+  text-align: left;
+}
+.airtable-form[hidden] { display: none; }
+.airtable-form .privacy { text-align: left; }
+
+.field-label { font-weight: 700; }
+
+.field {
+  width: 100%;
+  min-height: var(--btn-h);
+  padding: 0 16px;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-body);
+}
+.field:focus-visible { outline: 3px solid var(--pink-500); outline-offset: 2px; }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-small);
+  cursor: pointer;
+}
+.check input { width: 22px; height: 22px; accent-color: var(--pink-500); }
+
+.btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
+
 .source {
   display: inline-block;
   max-width: 100%;

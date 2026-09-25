@@ -20,6 +20,7 @@ The main question the dashboard answers: *"How many people did we onboard this w
 - **Company-wide view only** (no per-site or per-team filter).
 - Data is read from a **CSV file**, `data/employees.csv` (§6.2). It holds mock data for now. No backend, no login.
 - An **Import CSV button** lets the user look at different data by choosing their own CSV file (§4.6). The file is read in the browser only.
+- A **Connect Airtable button** shows live data from the Airtable **Employees** table, using a token the viewer pastes in (§4.7).
 - Urban branding: logo and company name in the header (§5.4).
 - Read-only: choose a time range and explore, no editing.
 
@@ -49,6 +50,7 @@ The main question the dashboard answers: *"How many people did we onboard this w
 - Data-source line under the date range: says which data is showing (see §4.6)
 - Time-range buttons (big, segmented): **4 weeks · 8 weeks · 12 weeks** (default: 12)
 - **Import CSV** button under the range buttons, with a "Use sample data" button next to it once a file is loaded, and the note "Your file stays in your browser. It is not uploaded anywhere."
+- **Connect Airtable** button next to Import CSV; it opens a small token form (§4.7). While Airtable data is showing, the "Use sample data" button reads **Disconnect Airtable**.
 
 ### 4.2 KPI cards (3)
 | Card | Value | Detail line |
@@ -90,6 +92,18 @@ Purpose: let the user look at different data (for example a real HR export) with
   - empty, or missing a needed column (`full_name`, `role`, `department`, `employment_type`, `start_date`), with a hint if the columns are separated by semicolons
   - no full-time employee with a valid start date
 - Choosing a good file afterwards clears the message. Choosing the same file twice works.
+
+### 4.7 Live data from Airtable
+
+Purpose: show the data that is kept in Airtable, live, without putting any secret in the public repo.
+
+- Source: Airtable base **Project Tracker** (`appQTrIAIwLh7M0lU`), table **Employees** (`tblULyGaP4pQHMBWn`). Its fields match the CSV columns in §6.2: Employee ID, Full Name, Role, Department, Employment Type, Start Date, Onboarding Progress (a percent field), Onboarding Status. The IDs are not secret.
+- **Connect Airtable** (big button, `--violet-400`) opens a form with a password-style **Airtable token** field, a **Remember on this device** checkbox (off by default), **Connect** and **Cancel**, and the note "The token stays in this browser and is sent only to Airtable. Use a read-only token."
+- The token is **never written into the code or the repo**. Each viewer pastes their own personal access token, which should have only the `data.records:read` scope and only the Project Tracker base. It is sent only to `api.airtable.com`. With Remember ticked it is kept in the browser's local storage and the page reconnects on the next visit; otherwise it is gone after a refresh.
+- The dashboard reads every row (Airtable sends up to 100 per request, so it follows the pages) and then works exactly like an imported file: full-time only, today's date with the old-data fallback, the same checks.
+- The data-source line reads, for example: `Airtable (live): Project Tracker › Employees · 136 full-time employees · 4 not full-time (ignored)`.
+- **Disconnect Airtable** goes back to the sample data and forgets a remembered token.
+- Errors show a pink message and leave the current data on screen: token not accepted (401), token cannot read the table (403/404, with a hint about the scope and base), Airtable not reachable, or any other Airtable error. A remembered token that is no longer accepted is forgotten.
 
 ## 5. Visual design
 
@@ -139,7 +153,7 @@ Purpose: let the user look at different data (for example a real HR export) with
 - The **8 weeks** button is a different, deeper purple when not selected: `--violet-400` (hover: `--violet-300`). When selected it turns `--pink-400` like the other two.
 - Hover/press: lift 2 px, brighten fill; visible focus ring (4 px `--violet-700`).
 - Time-range buttons are full-width segmented on mobile, inline on desktop.
-- **Import CSV** and **Use sample data** use the same big pill style (56 / 64 px tall, 20 px text, `--ink` outline). Import is `--pink-300` (hover `--pink-400`), Use sample data is `--violet-300`. On phones each is a full-width button; on desktop they sit side by side, right-aligned.
+- **Import CSV** and **Use sample data** use the same big pill style (56 / 64 px tall, 20 px text, `--ink` outline). Import is `--pink-300` (hover `--pink-400`), Connect Airtable is `--violet-400` (hover `--violet-300`), Use sample data / Disconnect Airtable is `--violet-300`. On phones each is a full-width button; on desktop they sit side by side, right-aligned.
 
 ### 5.4 Branding (Urban)
 - **Logo:** a rounded square with the pink→violet gradient, a dark **"U"** and a small dot above its right stem (a new arrival). File: `icons/icon.svg`.
@@ -260,6 +274,7 @@ U-1044,Dana Rosen,Freelance Designer,Product & Design,contractor,2026-09-14,10,i
 - Empty or zero weeks still render a bar slot with the label `0`.
 - The built-in CSV is loaded once when the page opens, through one function (`getWeeklyHires()`). If it cannot be loaded, a pink message explains why and what to do (§6.2); Import CSV still works.
 - An imported file is read with the browser's `File` API and handled in memory; nothing is stored or sent (§4.6).
+- Airtable data is fetched from the browser straight from the Airtable API with the viewer's token (§4.7). There is still no backend of our own.
 
 ## 8. Technical approach
 
@@ -288,7 +303,7 @@ Checked in the browser on 2026-09-19 (v1).
 - [x] All buttons are at least 56 px tall.
 - [x] Layout is usable at 320, 360, 375, 390 and 414 px wide, sideways at 740 × 360 and on a 768 px tablet with no horizontal page scroll, and uses the full width nicely at 1440 px.
 - [x] Purple **and** pink shades are clearly visible in cards, buttons, and charts.
-- [x] Reads every number from `data/employees.csv`, with no calls to any API.
+- [x] By default reads every number from `data/employees.csv`, with no calls to any API (Airtable is called only after Connect Airtable, §4.7).
 - [x] The Urban logo and name appear in the header on desktop and mobile.
 - [x] Contractors and interns in the CSV are not counted, and do not appear in Recent joiners.
 - [x] The CSV reader handles quoted commas and quotes, Windows line endings, a byte-order mark, an unknown department (goes to Other), out-of-range progress, future start dates, and bad or missing dates (row skipped and reported).
@@ -298,6 +313,7 @@ Checked in the browser on 2026-09-19 (v1).
 - [x] Import CSV: an old file (no hires in the 12 weeks before today) falls back to the file's own latest date and says so.
 - [x] Import CSV: a wrong file type, an empty file, a file over 5 MB, missing columns, a semicolon-separated file, and a file with no full-time rows each show a clear message and leave the current data on screen.
 - [x] The import buttons are 56 px tall (64 px on desktop) and full width on a 375 px phone, with no horizontal scroll.
+- [x] Connect Airtable (checked 2026-09-25): the token was confirmed against the live table, and the dashboard read both pages of the real rows (100 + 40) and showed 136 full-time and 4 ignored, with percents shown as 0–100. A rejected token shows the pink message and keeps the current data. Disconnect goes back to the sample. The form fits a 375 px phone with no horizontal scroll.
 - [ ] Not tested: opening `index.html` from disk in a real tab (the sample cannot load there; Import CSV is expected to still work).
 
 ## 11. Decisions
@@ -313,6 +329,7 @@ Confirmed 2026-09-19:
 7. **Branding:** company name **Urban**, with a logo in the header (§5.4).
 8. **Delivery:** the code is committed and pushed to the GitHub repo, and the repo link is shared with the teacher (§12).
 9. **Import CSV button:** lets the user load a different CSV to look at other data. It is read in the browser only, it is temporary (gone after a refresh), and there is a one-click way back to the sample (§4.6). History: first built as "Upload CSV" on 2026-09-19, replaced the same day by a Download CSV button after a misunderstanding, and restored as **Import CSV** on 2026-09-23 (the download button was removed).
+10. **Airtable (2026-09-25):** live data comes from the Airtable Employees table through a **Connect Airtable** button where each viewer pastes their own read-only token (§4.7). Chosen over a nightly copy into the repo (would make the data public) and a small private server (more setup). The token must never be committed.
 
 ## 12. Delivery
 
@@ -346,3 +363,4 @@ Confirmed 2026-09-19:
 | 2026-09-23 | Download CSV replaced by **Import CSV**: the file-import feature (built on 2026-09-19 as Upload CSV) is back, renamed Import CSV, with "Use sample data", the data-source line and the privacy note (§4.6, §5.3). Imported files are read in the browser, use today's date (with an old-file fallback), and are checked with clear error messages. |
 | 2026-09-23 | `Practice.md` reduced to the working rule only (every change is committed and pushed to GitHub right away); the change-log entries were removed. The history stays in git. |
 | 2026-09-23 | Mobile fixes (§5.3, §5.5): no sideways scroll on 320 px phones (the hidden chart table was wider than the screen), roomier buttons and tighter padding under 380 px, a shorter chart when the phone is held sideways, and the offline helper (`sw.js`) now checks for newer files so phones don't keep an old version. |
+| 2026-09-25 | Added **Connect Airtable** (§4.7): an Airtable **Employees** table in the Project Tracker base holds the same 140 mock rows, and the dashboard can load it live with a token pasted in the browser (never stored in the repo). |

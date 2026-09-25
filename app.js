@@ -14,6 +14,25 @@
   const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
   const REQUIRED_COLUMNS = ['full_name', 'role', 'department', 'employment_type', 'start_date'];
 
+  // Live data from Airtable (optional). These IDs are not secret; the token is.
+  // The viewer types the token into the page, so it is never written into this code or the repo.
+  const AIRTABLE = {
+    base: 'appQTrIAIwLh7M0lU', // Project Tracker
+    table: 'tblULyGaP4pQHMBWn', // Employees
+    name: 'Project Tracker › Employees',
+    storageKey: 'urban-airtable-token'
+  };
+  // CSV column name -> Airtable field name
+  const AIRTABLE_FIELDS = {
+    full_name: 'Full Name',
+    role: 'Role',
+    department: 'Department',
+    employment_type: 'Employment Type',
+    start_date: 'Start Date',
+    onboarding_progress: 'Onboarding Progress',
+    onboarding_status: 'Onboarding Status'
+  };
+
   const DEPTS = [
     { key: 'engineering', name: 'Engineering', color: '#9B5CFF' },
     { key: 'product & design', name: 'Product & Design', color: '#FF4DAF' },
@@ -37,6 +56,7 @@
   let allWeeks = [];
   let recentJoiners = [];
   let sampleDataset = null;
+  let currentKind = 'sample'; // 'sample', 'file' or 'airtable'
   let lastChartWidth = 0;
 
   const $ = (sel) => document.querySelector(sel);
@@ -94,10 +114,9 @@
   // A problem with the data that is worth showing to the person as-is.
   class DataError extends Error {}
 
-  // Turns CSV text into employee objects.
+  // Turns table rows (the first row holds the column names) into employee objects.
   // Throws a DataError when a needed column is missing. Rows without a valid start_date are skipped.
-  function toEmployees(csvText) {
-    const [header, ...lines] = parseCsv(csvText);
+  function toEmployees([header, ...lines]) {
     if (!header) throw new DataError('The file is empty. It needs a first row with the column names.');
     const col = header.map((h) => h.trim().toLowerCase());
 
@@ -175,10 +194,11 @@
 
   const todayUtc = () => parseDate(new Date().toISOString().slice(0, 10));
 
-  // Everything the page shows, worked out from CSV text.
-  // The built-in sample is frozen at AS_OF; an imported file uses today's date.
-  function makeDataset(csvText, { name, isSample }) {
-    const { employees, skipped } = toEmployees(csvText);
+  // Everything the page shows, worked out from table rows (from a CSV file or from Airtable).
+  // The built-in sample is frozen at AS_OF; an imported file and Airtable use today's date.
+  function makeDataset(rows, { name, kind }) {
+    const isSample = kind === 'sample';
+    const { employees, skipped } = toEmployees(rows);
     const fullTime = employees.filter((e) => e.fullTime);
     if (!fullTime.length) {
       throw new DataError('No full-time employees with a valid start date were found. ' +
@@ -196,21 +216,77 @@
         today = new Date(Math.max(...started));
         model = buildModel(employees, today);
         note = 'There are no hires in the 12 weeks before today, so this shows the 12 weeks up to ' +
-          shortDate.format(today) + ', ' + today.getUTCFullYear() + ', the latest start date in the file.';
+          shortDate.format(today) + ', ' + today.getUTCFullYear() + ', the latest start date in the ' +
+          (kind === 'airtable' ? 'table.' : 'file.');
       }
     }
 
     return {
       ...model,
-      source: { name, isSample, fullTime: fullTime.length, notFullTime: employees.length - fullTime.length, skipped, note }
+      source: { name, kind, fullTime: fullTime.length, notFullTime: employees.length - fullTime.length, skipped, note }
     };
   }
 
-  // Single entry point for the built-in data. Swap the body for an API call later.
+  // Single entry point for the built-in data.
   async function getWeeklyHires() {
     const response = await fetch(CSV_URL, { cache: 'no-cache' });
     if (!response.ok) throw new Error(CSV_URL + ' returned HTTP ' + response.status);
-    return makeDataset(await response.text(), { name: CSV_URL, isSample: true });
+    return makeDataset(parseCsv(await response.text()), { name: CSV_URL, kind: 'sample' });
+  }
+
+  /* ---------- Data: Airtable ---------- */
+
+  // Airtable keeps a percent as 0–1; the dashboard expects 0–100 like the CSV.
+  function airtableCell(value, column) {
+    if (value == null) return '';
+    if (column === 'onboarding_progress' && typeof value === 'number') return String(Math.round(value * 100));
+    return String(value);
+  }
+
+  // Reads every row of the Employees table (Airtable sends at most 100 per request).
+  // Returns rows shaped like the CSV, so the rest of the dashboard works the same.
+  async function fetchAirtableRows(token) {
+    const columns = Object.keys(AIRTABLE_FIELDS);
+    const rows = [columns];
+    let offset = '';
+    do {
+      const url = 'https://api.airtable.com/v0/' + AIRTABLE.base + '/' + AIRTABLE.table + '?pageSize=100' +
+        (offset ? '&offset=' + encodeURIComponent(offset) : '');
+      let response;
+      try {
+        response = await fetch(url, { headers: { Authorization: 'Bearer ' + token }, cache: 'no-store' });
+      } catch (error) {
+        throw new DataError('Airtable could not be reached. Check the internet connection and try again.');
+      }
+      if (response.status === 401) {
+        throw Object.assign(new DataError('Airtable did not accept this token. Check that it was copied in full ' +
+          '(it starts with "pat" and has a dot in the middle).'), { badToken: true });
+      }
+      if (response.status === 403 || response.status === 404) {
+        throw Object.assign(new DataError('This token cannot read the Employees table. In Airtable, give the token ' +
+          'the data.records:read scope and access to the Project Tracker base.'), { badToken: true });
+      }
+      if (!response.ok) throw new DataError('Airtable answered with an error (HTTP ' + response.status + '). Try again in a minute.');
+
+      const page = await response.json();
+      page.records.forEach((record) => {
+        rows.push(columns.map((column) => airtableCell(record.fields[AIRTABLE_FIELDS[column]], column)));
+      });
+      offset = page.offset || '';
+    } while (offset);
+    return rows;
+  }
+
+  // The token is kept only if the viewer asks for it, and only in this browser.
+  function savedToken() {
+    try { return localStorage.getItem(AIRTABLE.storageKey) || ''; } catch (error) { return ''; }
+  }
+
+  function saveToken(token) {
+    try {
+      if (token) localStorage.setItem(AIRTABLE.storageKey, token);
+      else localStorage.removeItem(AIRTABLE.storageKey);
+    } catch (error) { /* storage blocked: the token just is not remembered */ }
   }
 
   function deltaText(current, previous, suffix) {
@@ -495,11 +571,14 @@
 
   const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
 
+  const SOURCE_LABEL = {
+    sample: (name) => 'Sample data (' + name + ')',
+    file: (name) => 'Your file: ' + name,
+    airtable: (name) => 'Airtable (live): ' + name
+  };
+
   function renderSource(source) {
-    const parts = [
-      source.isSample ? 'Sample data (' + source.name + ')' : 'Your file: ' + source.name,
-      plural(source.fullTime, 'full-time employee')
-    ];
+    const parts = [SOURCE_LABEL[source.kind](source.name), plural(source.fullTime, 'full-time employee')];
     if (source.notFullTime) parts.push(source.notFullTime + ' not full-time (ignored)');
     if (source.skipped) parts.push(plural(source.skipped, 'row') + ' skipped (invalid start date)');
     $('#source-label').textContent = parts.join(' · ');
@@ -507,7 +586,9 @@
     const note = $('#source-note');
     note.textContent = source.note;
     note.hidden = !source.note;
-    $('#reset-btn').hidden = source.isSample;
+    const reset = $('#reset-btn');
+    reset.hidden = source.kind === 'sample';
+    reset.textContent = source.kind === 'airtable' ? 'Disconnect Airtable' : 'Use sample data';
   }
 
   function showNotice(title, detail) {
@@ -521,6 +602,7 @@
   const hideNotice = () => { $('#notice').hidden = true; };
 
   function applyDataset(dataset) {
+    currentKind = dataset.source.kind;
     allWeeks = dataset.weeks;
     recentJoiners = dataset.recent;
     renderJoiners();
@@ -540,12 +622,55 @@
       }
       if (file.size > MAX_UPLOAD_BYTES) throw new DataError('That file is larger than 5 MB.');
       // The file is read here in the browser. It is never sent anywhere.
-      applyDataset(makeDataset(await file.text(), { name: file.name, isSample: false }));
+      applyDataset(makeDataset(parseCsv(await file.text()), { name: file.name, kind: 'file' }));
       hideNotice();
     } catch (error) {
       console.error(error);
       showNotice('That file could not be used.',
         error instanceof DataError ? error.message : 'It could not be read as a CSV file.');
+    }
+  }
+
+  async function connectAirtable(token) {
+    applyDataset(makeDataset(await fetchAirtableRows(token), { name: AIRTABLE.name, kind: 'airtable' }));
+    hideNotice();
+  }
+
+  function showAirtableError(error) {
+    console.error(error);
+    showNotice('Could not load the data from Airtable.',
+      error instanceof DataError ? error.message : 'Something went wrong while reading the table.');
+  }
+
+  function toggleAirtableForm(open) {
+    const form = $('#airtable-form');
+    form.hidden = !open;
+    $('#airtable-btn').setAttribute('aria-expanded', String(open));
+    if (open) {
+      $('#airtable-remember').checked = Boolean(savedToken());
+      $('#airtable-token').focus();
+    } else {
+      $('#airtable-token').value = '';
+    }
+  }
+
+  async function onAirtableSubmit(event) {
+    event.preventDefault();
+    const token = $('#airtable-token').value.trim();
+    if (!token) return;
+    const submit = $('#airtable-submit');
+    submit.disabled = true;
+    submit.textContent = 'Connecting…';
+    try {
+      await connectAirtable(token);
+      saveToken($('#airtable-remember').checked ? token : '');
+      toggleAirtableForm(false);
+      $('#airtable-btn').focus();
+    } catch (error) {
+      showAirtableError(error);
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Connect';
     }
   }
 
@@ -572,10 +697,14 @@
     $('#upload-btn').addEventListener('click', () => $('#file-input').click());
     $('#file-input').addEventListener('change', onFileChosen);
     $('#reset-btn').addEventListener('click', () => {
+      if (currentKind === 'airtable') saveToken(''); // Disconnect: forget the token too
       if (!sampleDataset) return;
       applyDataset(sampleDataset);
       hideNotice();
     });
+    $('#airtable-btn').addEventListener('click', () => toggleAirtableForm($('#airtable-form').hidden));
+    $('#airtable-cancel').addEventListener('click', () => { toggleAirtableForm(false); $('#airtable-btn').focus(); });
+    $('#airtable-form').addEventListener('submit', onAirtableSubmit);
     bindChart();
 
     if ('ResizeObserver' in window) {
@@ -595,7 +724,18 @@
       sampleDataset = await getWeeklyHires();
       applyDataset(sampleDataset);
     } catch (error) {
-      showLoadError(error); // Import CSV still works
+      showLoadError(error); // Import CSV and Airtable still work
+    }
+
+    // A token remembered on this device reconnects to Airtable automatically.
+    const token = savedToken();
+    if (token) {
+      try {
+        await connectAirtable(token);
+      } catch (error) {
+        if (error.badToken) saveToken('');
+        showAirtableError(error);
+      }
     }
   }
 
