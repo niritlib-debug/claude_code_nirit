@@ -36,7 +36,7 @@
   // A second table in the same base, filled from LinkedIn with Apify. Shown only while Airtable is connected,
   // so the names never appear in the public sample.
   const PM_TABLE = 'tbldfW8CPLQJ51bDA'; // New Construction PMs
-  const PM_WEEKS = 4;
+  const PM_WEEKS = 8;
 
   const DEPTS = [
     { key: 'engineering', name: 'Engineering', color: '#9B5CFF' },

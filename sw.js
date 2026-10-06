@@ -1,5 +1,5 @@
 // Minimal offline cache so the dashboard opens like an app on a phone.
-const CACHE = 'new-hires-v5';
+const CACHE = 'new-hires-v6';
 const SHELL = [
   './',
   'index.html',
